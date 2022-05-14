@@ -8,6 +8,9 @@
 
 # IntelliJ
 /out/
+/lib/
+/gen/
+/src/main/gen/
 ./idea
 
 # Gradle
