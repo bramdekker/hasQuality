@@ -3,7 +3,11 @@ Open-source command line application that analyzes and reports on the quality of
 
 
 ## How to use this application
-1. Build the project
-`gradle build`
-2. Run the application on your Haskell project
-`gradle run <my-haskell-project-dir>`
+1. Build the project:
+```shell
+gradle build
+```
+2. Run the application on your Haskell project:
+```shell
+gradle run <my-haskell-project-dir>
+```
