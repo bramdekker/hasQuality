@@ -42,4 +42,11 @@ jobs:
     steps:
     - name: Test with Gradle
       run: ./gradlew test
+      
+  code-style:
     
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Check code style
+      run: ./gradlew checkstyleMain
