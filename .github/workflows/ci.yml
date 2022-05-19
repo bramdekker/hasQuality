@@ -40,6 +40,8 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
+    - name: Give gradle permissions
+      run: chmod +x ./gradlew
     - name: Test with Gradle
       run: ./gradlew test
       
@@ -48,5 +50,7 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
+    - name: Give gradle permissions
+      run: chmod +x ./gradlew
     - name: Check code style
       run: ./gradlew checkstyleMain
