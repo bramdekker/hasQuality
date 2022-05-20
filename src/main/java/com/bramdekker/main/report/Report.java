@@ -3,6 +3,7 @@ package com.bramdekker.main.report;
 import com.bramdekker.main.configuration.Configuration;
 import com.bramdekker.main.metrics.MetricType;
 import com.bramdekker.main.resources.FileList;
+import java.io.FileNotFoundException;
 
 /**
  * Class that assembles the final report. It contains sections with metrics measuring the same
@@ -34,7 +35,7 @@ public class Report {
   }
 
   /** Prints out the report in sections. */
-  public void display() {
+  public void display() throws FileNotFoundException {
     System.out.println(String.format("Report for Haskell project %s\n", config.getDirectory()));
     for (MetricType metric : config.getMetrics()) {
       System.out.println(metric.getSection());

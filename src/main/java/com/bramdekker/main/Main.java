@@ -11,6 +11,7 @@ import com.bramdekker.main.validator.Validator;
 // test-project
 // 62 + 76 = 138 lines in total
 // 12 + 15 = 27 blank lines
+// 111 = LOC
 // 31 + 27 = 58 comment lines
 // 53 code lines
 // Size in bytes: 2.683 + 2.146 = 4829 bytes
