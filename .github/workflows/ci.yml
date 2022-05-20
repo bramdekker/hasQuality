@@ -18,9 +18,7 @@ permissions:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v3
     - name: Set up JDK 17
@@ -28,17 +26,16 @@ jobs:
       with:
         java-version: '17'
         distribution: 'corretto'
+        cache: 'gradle'
     - name: Build with Gradle
-      uses: gradle/gradle-build-action@0d13054264b0bb894ded474f08ebb30921341cee
-      with:
-        arguments: build
+      run: ./gradlew build
+#       uses: gradle/gradle-build-action@0d13054264b0bb894ded474f08ebb30921341cee
+#       with:
+#         arguments: build
         
   test:
-  
     needs: build
-  
     runs-on: ubuntu-latest
-    
     steps:
     - name: Give gradle permissions
       run: chmod +x ./gradlew
@@ -46,9 +43,7 @@ jobs:
       run: ./gradlew test
       
   code-style:
-    
     runs-on: ubuntu-latest
-    
     steps:
     - name: Give gradle permissions
       run: chmod +x ./gradlew
