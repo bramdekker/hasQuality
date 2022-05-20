@@ -20,6 +20,7 @@ import java.io.File;
 // - graph with modules/statements as nodes and control flow/data links as edges
 
 /** Collection of methods that determine size metrics. */
+// TODO: think of way to 'store' calculated metrics for further reuse. LOC = NCLOC + CLOC, comment density = CLOC / LOC
 public class Size {
   /**
    * Generate the section for size metrics.
@@ -35,5 +36,41 @@ public class Size {
     }
 
     return sizeSection.toString();
+  }
+
+  private void calculateNCLOC() {
+
+  }
+
+  private void calculateCLOC() {
+
+  }
+
+  private void calculateLOC() {
+
+  }
+
+  private void calculateES() {
+
+  }
+
+  private void calculateDSI() {
+
+  }
+
+  private void calculateSizeInBytes() {
+
+  }
+
+  private void calculateSizeInChars() {
+
+  }
+
+  private void calculateGraphSize() {
+
+  }
+
+  private void calculateParseTreeSize() {
+
   }
 }

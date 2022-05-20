@@ -2,11 +2,10 @@ package com.bramdekker.main.configuration;
 
 import com.bramdekker.main.exceptions.InvalidCommandException;
 import com.bramdekker.main.metrics.MetricType;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-
 import java.util.Arrays;
 import java.util.List;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 class ConfigurationTest {
 
