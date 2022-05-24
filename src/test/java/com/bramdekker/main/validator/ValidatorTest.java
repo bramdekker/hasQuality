@@ -1,13 +1,13 @@
 package com.bramdekker.main.validator;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.bramdekker.main.exceptions.InvalidCommandException;
 import com.bramdekker.main.exceptions.InvalidPathnameException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -35,6 +35,20 @@ class ValidatorTest {
   }
 
   @Test
+  void validateSucceedsWhenHaskellFileGiven()
+          throws InvalidPathnameException, InvalidCommandException {
+    String dir = pathToTestResources + "/haskell-project/individual.hs";
+    assertTrue(new Validator().validate(new String[] {"-f", dir}));
+  }
+
+  @Test
+  void validateSucceedsWhenValidFlagsAndHaskellFileGiven()
+          throws InvalidPathnameException, InvalidCommandException {
+    String dir = pathToTestResources + "/haskell-project/individual.hs";
+    assertTrue(new Validator().validate(new String[] {"-s", "-r", "-f", dir}));
+  }
+
+  @Test
   void validateReturnsFalseWhenHelpFlagIsUsed()
       throws InvalidPathnameException, InvalidCommandException {
     assertFalse(new Validator().validate(new String[] {"-h"}));
@@ -47,8 +61,26 @@ class ValidatorTest {
   }
 
   @Test
+  void validateFailsWhenNoHaskellFileIsGiven() {
+    String dir = pathToTestResources + "/haskell-project/haskell_college_handouts.pdf";
+    assertThrows(
+            InvalidPathnameException.class,
+            () -> new Validator().validate(new String[] {"-f", dir})
+    );
+  }
+
+  @Test
+  void validateFailsWhenNoFlagHaskellFileGiven()
+          throws InvalidPathnameException, InvalidCommandException {
+    String dir = pathToTestResources + "/haskell-project/individual.hs";
+    assertThrows(
+            InvalidPathnameException.class,
+            () -> new Validator().validate(new String[] {dir}));
+  }
+
+  @Test
   void validateFailsWhenNoArgumentGiven() {
-    Assertions.assertThrows(
+    assertThrows(
         InvalidCommandException.class, () -> new Validator().validate(new String[] {}));
   }
 
@@ -56,13 +88,13 @@ class ValidatorTest {
   void validateFailsWhenExistingFileGiven() {
     String dir = pathToTestResources + "/haskell-project/individual.hs";
 
-    Assertions.assertThrows(
+    assertThrows(
         InvalidPathnameException.class, () -> new Validator().validate(new String[] {dir}));
   }
 
   @Test
   void validateFailsWhenNonExistingDirectoryGiven() {
-    Assertions.assertThrows(
+    assertThrows(
         InvalidPathnameException.class,
         () -> new Validator().validate(new String[] {"qwlieurjhsadg"}));
   }
@@ -71,7 +103,7 @@ class ValidatorTest {
   void validateFailsWhenExistingDirectoryDoesNotContainHaskellFiles() {
     String dir = pathToTestResources + "/python-project";
 
-    Assertions.assertThrows(
+    assertThrows(
         InvalidPathnameException.class, () -> new Validator().validate(new String[] {dir}));
   }
 }

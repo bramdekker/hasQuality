@@ -1,10 +1,12 @@
 package com.bramdekker.main.configuration;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import com.bramdekker.main.exceptions.InvalidCommandException;
 import com.bramdekker.main.metrics.MetricType;
 import java.util.Arrays;
 import java.util.List;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 class ConfigurationTest {
@@ -15,7 +17,7 @@ class ConfigurationTest {
     String dirName = "/just/some/test/directory";
     String[] args = new String[] {wrongFlag, dirName};
 
-    Assertions.assertThrows(InvalidCommandException.class, () -> new Configuration(args));
+    assertThrows(InvalidCommandException.class, () -> new Configuration(args));
   }
 
   @Test
@@ -23,7 +25,7 @@ class ConfigurationTest {
     String dirName = "/just/some/test/directory";
     String[] args = new String[] {dirName};
 
-    Assertions.assertEquals(dirName, new Configuration(args).getDirectory());
+    assertEquals(dirName, new Configuration(args).getDirectory());
   }
 
   @Test
@@ -31,19 +33,19 @@ class ConfigurationTest {
     String dirName = "/just/some/test/directory";
     String[] args = new String[] {"-s", "-r", dirName};
 
-    Assertions.assertEquals(dirName, new Configuration(args).getDirectory());
+    assertEquals(dirName, new Configuration(args).getDirectory());
   }
 
   @Test
   void getMetricsReturnsAllMetricsWhenNoFlagsSpecified() throws InvalidCommandException {
-    Assertions.assertEquals(
+    assertEquals(
         Arrays.asList(MetricType.values()),
         new Configuration(new String[] {"test-dir"}).getMetrics());
   }
 
   @Test
   void getMetricsReturnsOnlySpecifiedMetrics() throws InvalidCommandException {
-    Assertions.assertEquals(
+    assertEquals(
         List.of(MetricType.RECURSION),
         new Configuration(new String[] {"-r", "test-dir"}).getMetrics());
   }

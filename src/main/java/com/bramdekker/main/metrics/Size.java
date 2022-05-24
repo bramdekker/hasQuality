@@ -1,5 +1,7 @@
 package com.bramdekker.main.metrics;
 
+import static com.bramdekker.main.util.MetricPrinter.getMetricString;
+
 import com.bramdekker.main.resources.FileList;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -21,21 +23,20 @@ import java.util.Scanner;
 // - number in bytes
 // - graph with modules/statements as nodes and control flow/data links as edges
 
-// TODO: think of way to 'store' calculated metrics for further reuse. LOC = NCLOC + CLOC,
-// comment density = CLOC / LOC
-// TODO: suppress AbbreviationAsWordInName in checkstyle
 /** Collection of methods that determine size metrics. */
 public class Size {
-  private static int LOC;
-  private static int blankLines;
-  private static int NCLOC;
-  private static int CLOC;
-  private static int DSI;
-  private static int ES;
-  private static int bytes;
-  private static int chars;
-  private static int graphSize;
-  private static int parseTreeSize;
+  private static long LOC;
+  private static long blankLines;
+  private static long NCLOC;
+  private static long CLOC;
+  private static long DSI;
+  private static long ES;
+  private static long bytes;
+  private static long chars;
+  private static long graphSize;
+  private static long parseTreeSize;
+  private static long avgModuleSize;
+  private static long maxModuleSize;
 
 
   /**
@@ -47,12 +48,14 @@ public class Size {
     calculateMetrics();
     StringBuilder sizeSection = new StringBuilder("Size metrics: \n");
 
-    sizeSection.append(String.format("LOC: %d\n", LOC));
-    sizeSection.append(String.format("NCLOC: %d\n", NCLOC));
-    sizeSection.append(String.format("CLOC: %d\n", CLOC));
-    sizeSection.append(String.format("Blank lines: %d\n", blankLines));
-    sizeSection.append(String.format("Size in bytes: %d\n", bytes));
-    sizeSection.append(String.format("Size in characters: %d\n", chars));
+    sizeSection.append(getMetricString("LOC", LOC));
+    sizeSection.append(getMetricString("NCLOC", NCLOC));
+    sizeSection.append(getMetricString("CLOC", CLOC));
+    sizeSection.append(getMetricString("Blank lines", blankLines));
+    sizeSection.append(getMetricString("Size in bytes", bytes));
+    sizeSection.append(getMetricString("Size in characters", chars));
+    sizeSection.append(getMetricString("Average module size (NCLOC)", avgModuleSize));
+    sizeSection.append(getMetricString("Maximum module size (NCLOC)", maxModuleSize));
 
     return sizeSection.toString();
   }
@@ -71,6 +74,8 @@ public class Size {
     parseTreeSize = 0;
     bytes = 0;
     chars = 0;
+    avgModuleSize = 0;
+    maxModuleSize = 0;
   }
 
   // TODO: use parse tree to determine data declaration and header to calculate DSI / ES.
@@ -82,8 +87,12 @@ public class Size {
    */
   private static void calculateMetrics() throws FileNotFoundException {
     initializeMetrics();
+    int numberOfModules = 0;
+    int currentModuleSize = 0;
 
     for (File file : FileList.getInstance().getHaskellFiles()) {
+      numberOfModules++;
+
       bytes += file.length();
       Scanner curFileScanner = new Scanner(file);
       String curLine;
@@ -94,10 +103,10 @@ public class Size {
         chars += curLine.length() + 1;
 
         if (!isBlank(curLine)) {
-
           if (isComment(curLine)) {
             CLOC++;
           } else { // Code line
+            currentModuleSize++;
             NCLOC++;
             ES++;
             DSI++;
@@ -108,9 +117,16 @@ public class Size {
       }
 
       curFileScanner.close();
+
+      // Determine if this is the new maximum module size.
+      if (currentModuleSize > maxModuleSize) {
+        maxModuleSize = currentModuleSize;
+      }
+      currentModuleSize = 0;
     }
 
     LOC = NCLOC + CLOC;
+    avgModuleSize = (long) Math.ceil((double) NCLOC / numberOfModules);
   }
 
   /**
@@ -158,7 +174,7 @@ public class Size {
    *
    * @return int representing the size in characters measure.
    */
-  public static int getChars() {
+  public static long getChars() {
     return chars;
   }
 
@@ -167,7 +183,7 @@ public class Size {
    *
    * @return int representing the size in bytes measure.
    */
-  public static int getBytes() {
+  public static long getBytes() {
     return bytes;
   }
 
@@ -176,7 +192,7 @@ public class Size {
    *
    * @return int representing the number of comment lines measure.
    */
-  public static int getCLOC() {
+  public static long getCLOC() {
     return CLOC;
   }
 
@@ -185,7 +201,7 @@ public class Size {
    *
    * @return int representing the number of blank lines measure.
    */
-  public static int getBlankLines() {
+  public static long getBlankLines() {
     return blankLines;
   }
 
@@ -194,7 +210,7 @@ public class Size {
    *
    * @return int representing the number of Delivered Source Instructions measure.
    */
-  public static int getDSI() {
+  public static long getDSI() {
     return DSI;
   }
 
@@ -203,7 +219,7 @@ public class Size {
    *
    * @return int representing the number of Executable Statements measure.
    */
-  public static int getES() {
+  public static long getES() {
     return ES;
   }
 
@@ -212,7 +228,7 @@ public class Size {
    *
    * @return int representing the graph size measure.
    */
-  public static int getGraphSize() {
+  public static long getGraphSize() {
     return graphSize;
   }
 
@@ -221,7 +237,7 @@ public class Size {
    *
    * @return int representing the number of lines of code in the project.
    */
-  public static int getLOC() {
+  public static long getLOC() {
     return LOC;
   }
 
@@ -230,7 +246,7 @@ public class Size {
    *
    * @return int representing the number of non-comment lines in the project.
    */
-  public static int getNCLOC() {
+  public static long getNCLOC() {
     return NCLOC;
   }
 
@@ -239,7 +255,25 @@ public class Size {
    *
    * @return int representing the size of the parse tree.
    */
-  public static int getParseTreeSize() {
+  public static long getParseTreeSize() {
     return parseTreeSize;
+  }
+
+  /**
+   * Getter for the avgModuleSize static variable.
+   *
+   * @return int representing the average size of a module in the project.
+   */
+  public static long getAvgModuleSize() {
+    return avgModuleSize;
+  }
+
+  /**
+   * Getter for the maxModuleSize static variable.
+   *
+   * @return int representing the maximum size of a module in the project.
+   */
+  public static long getMaxModuleSize() {
+    return maxModuleSize;
   }
 }

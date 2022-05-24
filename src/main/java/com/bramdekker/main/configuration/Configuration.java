@@ -16,6 +16,7 @@ public class Configuration {
   private static final List<MetricType> allMetrics = Arrays.asList(MetricType.values());
   private final List<MetricType> metrics = new ArrayList<>();
   private final String directory;
+  private boolean singleFile = false;
 
   /**
    * Constructor that takes all command line arguments as parameter. It initializes the directory
@@ -37,6 +38,9 @@ public class Configuration {
           break;
         case "-r":
           this.metrics.add(RECURSION);
+          break;
+        case "-f":
+          this.singleFile = true;
           break;
         default:
           throw new InvalidCommandException("Unknown flag used!");

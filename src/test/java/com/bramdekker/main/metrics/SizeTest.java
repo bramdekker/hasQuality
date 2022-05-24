@@ -1,10 +1,11 @@
 package com.bramdekker.main.metrics;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import com.bramdekker.main.resources.FileList;
 import java.io.FileNotFoundException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -33,31 +34,41 @@ class SizeTest {
 
   @Test
   void locMeasureIsCorrect() {
-    Assertions.assertTrue(sizeSection.contains("LOC: 111"));
+    assertTrue(sizeSection.contains("LOC: 111"));
   }
 
   @Test
   void nclocMeasureIsCorrect() {
-    Assertions.assertTrue(sizeSection.contains("NCLOC: 53"));
+    assertTrue(sizeSection.contains("NCLOC: 53"));
   }
 
   @Test
   void clocMeasureIsCorrect() {
-    Assertions.assertTrue(sizeSection.contains("CLOC: 58"));
+    assertTrue(sizeSection.contains("CLOC: 58"));
   }
 
   @Test
   void blankLinesMeasureIsCorrect() {
-    Assertions.assertTrue(sizeSection.contains("Blank lines: 27"));
+    assertTrue(sizeSection.contains("Blank lines: 27"));
   }
 
   @Test
   void sizeInBytesMeasureIsCorrect() {
-    Assertions.assertTrue(sizeSection.contains("Size in bytes: 4829"));
+    assertTrue(sizeSection.contains("Size in bytes: 4829"));
   }
 
   @Test
   void sizeInCharactersMeasureIsCorrect() {
-    Assertions.assertTrue(sizeSection.contains("Size in characters: 4829"));
+    assertTrue(sizeSection.contains("Size in characters: 4829"));
+  }
+
+  @Test
+  void avgModuleSizeMeasureIsCorrect() {
+    assertTrue(sizeSection.contains("Average module size (NCLOC): 27"));
+  }
+
+  @Test
+  void maxModuleSizeMeasureIsCorrect() {
+    assertTrue(sizeSection.contains("Maximum module size (NCLOC): 30"));
   }
 }
