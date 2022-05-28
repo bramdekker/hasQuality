@@ -25,7 +25,7 @@ class ConfigurationTest {
     String dirName = "/just/some/test/directory";
     String[] args = new String[] {dirName};
 
-    assertEquals(dirName, new Configuration(args).getDirectory());
+    assertEquals(dirName, new Configuration(args).getPathname());
   }
 
   @Test
@@ -33,7 +33,7 @@ class ConfigurationTest {
     String dirName = "/just/some/test/directory";
     String[] args = new String[] {"-s", "-r", dirName};
 
-    assertEquals(dirName, new Configuration(args).getDirectory());
+    assertEquals(dirName, new Configuration(args).getPathname());
   }
 
   @Test

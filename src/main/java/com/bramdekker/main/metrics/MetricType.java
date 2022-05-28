@@ -1,6 +1,6 @@
 package com.bramdekker.main.metrics;
 
-import java.io.FileNotFoundException;
+import java.io.IOException;
 
 /**
  * Enum for all different metric types. The types all have a different section which can be accessed
@@ -8,7 +8,7 @@ import java.io.FileNotFoundException;
  */
 public enum MetricType {
   SIZE {
-    public String getSection() throws FileNotFoundException {
+    public String getSection() throws IOException {
       return Size.getSection();
     }
   },
@@ -18,5 +18,5 @@ public enum MetricType {
     }
   };
 
-  public abstract String getSection() throws FileNotFoundException;
+  public abstract String getSection() throws IOException;
 }

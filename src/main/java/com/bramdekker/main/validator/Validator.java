@@ -10,7 +10,7 @@ import java.util.Arrays;
 
 /**
  * Provides methods for validating the pathname entered by the user. The pathname should point to a
- * directory that exists and contains at least 1 Haskell file (.hs or .lhs extension).
+ * directory that exists and contains at least 1 Haskell file (.hs extension).
  */
 public class Validator {
   private static final FilenameFilter haskellFilter = new HaskellFileFilter();
@@ -40,26 +40,19 @@ public class Validator {
     String rawPathname = getPathname(args);
     File pathname = new File(rawPathname);
 
-    // If the pathname is a single file, check if it is an existing Haskell file.
-    if (Arrays.asList(args).contains("-f")) {
-      if (!pathname.isFile()) {
-        throw new InvalidPathnameException("When -f is used, pathname must point to a file!");
-      }
-
-      if (!isHaskellFile(pathname)) {
-        throw new InvalidPathnameException(
-                "When -f is used, pathname must point to a .hs or .lhs file!"
-        );
-      }
-
+    // If the pathname is a file, check if it is a Haskell file.
+    if (pathname.isFile() && !isHaskellFile(pathname)) {
+      throw new InvalidPathnameException("The given file must be a Haskell file!");
+    } else if (pathname.isFile()) {
       return true;
+    }
+
+    if (!pathname.isDirectory()) {
+      throw new InvalidPathnameException("Pathname must point to an existing directory!");
     }
 
     // If the pathname is a directory, check if it is an existing directory containing Haskell
     // code.
-    if (!pathname.isDirectory()) {
-      throw new InvalidPathnameException("Pathname must point to an existing directory!");
-    }
     if (!dirContainsHaskell(pathname)) {
       throw new InvalidPathnameException("Directory must contain at least 1 Haskell file!");
     }
@@ -76,7 +69,6 @@ public class Validator {
                 USAGE: ./gradle run [flags] <path-to-haskell-project-dir>
                 
                 Flags:
-                    -f              Use a single Haskell file as argument instead of a project.
                     -s              Compute and report on size metrics
                     -r              Compute and report on recursion metrics
                     -h / --help     Show this help message
@@ -136,7 +128,7 @@ public class Validator {
    */
   private boolean isHaskellFile(File file) {
     String fileString = file.toString();
-    return fileString.endsWith(".hs") || fileString.endsWith(".lhs");
+    return fileString.endsWith(".hs");
   }
 
   /**

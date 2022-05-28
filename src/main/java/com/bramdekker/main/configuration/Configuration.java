@@ -15,8 +15,7 @@ import java.util.List;
 public class Configuration {
   private static final List<MetricType> allMetrics = Arrays.asList(MetricType.values());
   private final List<MetricType> metrics = new ArrayList<>();
-  private final String directory;
-  private boolean singleFile = false;
+  private final String pathname;
 
   /**
    * Constructor that takes all command line arguments as parameter. It initializes the directory
@@ -28,7 +27,7 @@ public class Configuration {
   public Configuration(String[] args) throws InvalidCommandException {
     // Set the directory. We know this is the last element in the arguments list since it passed the
     // validator.
-    this.directory = args[args.length - 1];
+    this.pathname = args[args.length - 1];
 
     // Fill the list with metrics according to the flags set.
     for (int i = 0; i < args.length - 1; i++) {
@@ -38,9 +37,6 @@ public class Configuration {
           break;
         case "-r":
           this.metrics.add(RECURSION);
-          break;
-        case "-f":
-          this.singleFile = true;
           break;
         default:
           throw new InvalidCommandException("Unknown flag used!");
@@ -58,8 +54,8 @@ public class Configuration {
    *
    * @return a String specifying the directory.
    */
-  public String getDirectory() {
-    return this.directory;
+  public String getPathname() {
+    return this.pathname;
   }
 
   /**

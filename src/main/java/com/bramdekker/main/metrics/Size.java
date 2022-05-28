@@ -5,6 +5,11 @@ import static com.bramdekker.main.util.MetricPrinter.getMetricString;
 import com.bramdekker.main.resources.FileList;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
 import java.util.Scanner;
 
 // - lines of code (LOC)
@@ -25,18 +30,20 @@ import java.util.Scanner;
 
 /** Collection of methods that determine size metrics. */
 public class Size {
-  private static long LOC;
+  private static List<FileMetric> dataPerFile = new ArrayList<>();
+  private static long loc;
   private static long blankLines;
-  private static long NCLOC;
-  private static long CLOC;
-  private static long DSI;
-  private static long ES;
+  private static long ncloc;
+  private static long cloc;
+  private static long dsi;
+  private static long es;
   private static long bytes;
   private static long chars;
   private static long graphSize;
   private static long parseTreeSize;
   private static long avgModuleSize;
   private static long maxModuleSize;
+  private static String maxModuleName;
 
 
   /**
@@ -44,18 +51,23 @@ public class Size {
    *
    * @return a report section containing information about size metrics as String.
    */
-  public static String getSection() throws FileNotFoundException {
+  public static String getSection() throws IOException {
+    collectFileData();
     calculateMetrics();
     StringBuilder sizeSection = new StringBuilder("Size metrics: \n");
 
-    sizeSection.append(getMetricString("LOC", LOC));
-    sizeSection.append(getMetricString("NCLOC", NCLOC));
-    sizeSection.append(getMetricString("CLOC", CLOC));
+    sizeSection.append(getMetricString("LOC", loc));
+    sizeSection.append(getMetricString("NCLOC", ncloc));
+    sizeSection.append(getMetricString("CLOC", cloc));
     sizeSection.append(getMetricString("Blank lines", blankLines));
     sizeSection.append(getMetricString("Size in bytes", bytes));
     sizeSection.append(getMetricString("Size in characters", chars));
-    sizeSection.append(getMetricString("Average module size (NCLOC)", avgModuleSize));
-    sizeSection.append(getMetricString("Maximum module size (NCLOC)", maxModuleSize));
+
+    if (dataPerFile.size() > 1) {
+      sizeSection.append(getMetricString("Average module size (NCLOC)", avgModuleSize));
+      sizeSection.append(getMetricString("Maximum module size (NCLOC)", maxModuleSize));
+      sizeSection.append(String.format("Biggest module: %s", maxModuleName));
+    }
 
     return sizeSection.toString();
   }
@@ -64,12 +76,12 @@ public class Size {
    * Initializing all static variables of the class by setting them to 0.
    */
   private static void initializeMetrics() {
-    LOC = 0;
-    CLOC = 0;
-    NCLOC = 0;
+    loc = 0;
+    cloc = 0;
+    ncloc = 0;
     blankLines = 0;
-    DSI = 0;
-    ES = 0;
+    dsi = 0;
+    es = 0;
     graphSize = 0;
     parseTreeSize = 0;
     bytes = 0;
@@ -85,48 +97,76 @@ public class Size {
    *
    * @throws FileNotFoundException when a file in the FileList resource cannot be found.
    */
-  private static void calculateMetrics() throws FileNotFoundException {
-    initializeMetrics();
-    int numberOfModules = 0;
-    int currentModuleSize = 0;
-
+  private static void collectFileData() throws IOException {
     for (File file : FileList.getInstance().getHaskellFiles()) {
-      numberOfModules++;
-
-      bytes += file.length();
       Scanner curFileScanner = new Scanner(file);
       String curLine;
+      int charsInFile = 0;
+      int clocInFile = 0;
+      int nclocInFile = 0;
+      int blanklinesInFile = 0;
+      int esInFile = 0;
+      int dsiInFile = 0;
       while (curFileScanner.hasNextLine()) {
         curLine = curFileScanner.nextLine();
 
         // Line separator is excluded from nextLine, hence the +1.
-        chars += curLine.length() + 1;
+        charsInFile += curLine.length() + 1;
 
         if (!isBlank(curLine)) {
           if (isComment(curLine)) {
-            CLOC++;
+            clocInFile++;
           } else { // Code line
-            currentModuleSize++;
-            NCLOC++;
-            ES++;
-            DSI++;
+            nclocInFile++;
+            esInFile++;
+            dsiInFile++;
           }
         } else {
-          blankLines++;
+          blanklinesInFile++;
         }
       }
 
+      dataPerFile.add(new FileMetric(
+              file.getCanonicalPath(),
+              file.length(),
+              charsInFile,
+              clocInFile,
+              nclocInFile,
+              blanklinesInFile,
+              esInFile,
+              dsiInFile
+      ));
+
       curFileScanner.close();
-
-      // Determine if this is the new maximum module size.
-      if (currentModuleSize > maxModuleSize) {
-        maxModuleSize = currentModuleSize;
-      }
-      currentModuleSize = 0;
     }
+  }
 
-    LOC = NCLOC + CLOC;
-    avgModuleSize = (long) Math.ceil((double) NCLOC / numberOfModules);
+  private static void calculateMetrics() throws FileNotFoundException {
+    initializeMetrics();
+
+    sumFileData();
+
+    loc = ncloc + cloc;
+    avgModuleSize = (long) Math.ceil((double) ncloc / dataPerFile.size());
+    Optional<FileMetric> maxSize = dataPerFile.stream().max(
+            Comparator.comparingLong(a -> a.ncloc)
+    );
+    if (maxSize.isPresent()) {
+      maxModuleSize = maxSize.get().ncloc;
+      maxModuleName = maxSize.get().name;
+    }
+  }
+
+  private static void sumFileData() {
+    for (FileMetric metric : dataPerFile) {
+      bytes += metric.bytes;
+      chars += metric.chars;
+      cloc += metric.cloc;
+      ncloc += metric.ncloc;
+      blankLines += metric.blankLines;
+      es += metric.es;
+      dsi += metric.dsi;
+    }
   }
 
   /**
@@ -193,7 +233,7 @@ public class Size {
    * @return int representing the number of comment lines measure.
    */
   public static long getCLOC() {
-    return CLOC;
+    return cloc;
   }
 
   /**
@@ -211,7 +251,7 @@ public class Size {
    * @return int representing the number of Delivered Source Instructions measure.
    */
   public static long getDSI() {
-    return DSI;
+    return dsi;
   }
 
   /**
@@ -220,7 +260,7 @@ public class Size {
    * @return int representing the number of Executable Statements measure.
    */
   public static long getES() {
-    return ES;
+    return es;
   }
 
   /**
@@ -238,7 +278,7 @@ public class Size {
    * @return int representing the number of lines of code in the project.
    */
   public static long getLOC() {
-    return LOC;
+    return loc;
   }
 
   /**
@@ -247,7 +287,7 @@ public class Size {
    * @return int representing the number of non-comment lines in the project.
    */
   public static long getNCLOC() {
-    return NCLOC;
+    return ncloc;
   }
 
   /**
@@ -275,5 +315,14 @@ public class Size {
    */
   public static long getMaxModuleSize() {
     return maxModuleSize;
+  }
+
+  /**
+   * Getter for the maxModuleName static variable.
+   *
+   * @return String representing the name of the biggest module in the project.
+   */
+  public static String getMaxModuleName() {
+    return maxModuleName;
   }
 }

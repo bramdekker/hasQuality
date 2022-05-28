@@ -29,7 +29,7 @@ public class FileList {
     FileList newFileList = new FileList();
 
     // If the pathname is a Haskell file, set this file as the file list.
-    if (pathname.endsWith(".hs") || pathname.endsWith(".lhs")) {
+    if (pathname.endsWith(".hs")) {
       newFileList.setHaskellFiles(List.of(new File(pathname)));
       return newFileList;
     }

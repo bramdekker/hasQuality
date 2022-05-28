@@ -6,23 +6,20 @@ import com.bramdekker.main.exceptions.InvalidPathnameException;
 import com.bramdekker.main.report.Report;
 import com.bramdekker.main.validator.Validator;
 
-// test-project
-// 62 + 76 = 138 lines in total
-// 12 + 15 = 27 blank lines
-// 111 = LOC
-// (50 + 61) / 2 = 55.5 avg module size
-// 61 = max module size
-// 31 + 27 = 58 comment lines
-// 53 code lines
-// Size in bytes: 2.683 + 2.146 = 4829 bytes
-// Size in characters: 4829 characters
-// Executable statements: 49
-// Delivered Source instructions: 53
+// 1 Big Resource with different fields:
+// Project
+//    Name
+//    Files list (Modules)
+//        Name
+//        List of functions
+//            Name
+//            Callgraph (reference to the big callgraph)
+//        Callgraph (reference to the big callgraph)
+//    Callgraph (the big callgraph)
 
-// TODO: maybe different output options (csv file, terminal output, txt file)
-// TODO: test single haskell file size metrics
-// TODO: no flag for single haskell file. Collect data for individual files and then sum them up. Easier to expand
-// for new metrics and more data is collected this way. MAx and avg are easily calculated for every metric
+// TODO: collect data for individual files and then sum them up. Easier to expand
+// for new metrics and more data is collected this way. MAx and avg are easily calculated for
+// every metric
 
 /**
  * All code in this repository follows the Google Java style (<a

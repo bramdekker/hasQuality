@@ -38,14 +38,14 @@ class ValidatorTest {
   void validateSucceedsWhenHaskellFileGiven()
           throws InvalidPathnameException, InvalidCommandException {
     String dir = pathToTestResources + "/haskell-project/individual.hs";
-    assertTrue(new Validator().validate(new String[] {"-f", dir}));
+    assertTrue(new Validator().validate(new String[] {dir}));
   }
 
   @Test
   void validateSucceedsWhenValidFlagsAndHaskellFileGiven()
           throws InvalidPathnameException, InvalidCommandException {
     String dir = pathToTestResources + "/haskell-project/individual.hs";
-    assertTrue(new Validator().validate(new String[] {"-s", "-r", "-f", dir}));
+    assertTrue(new Validator().validate(new String[] {"-s", "-r", dir}));
   }
 
   @Test
@@ -65,14 +65,14 @@ class ValidatorTest {
     String dir = pathToTestResources + "/haskell-project/haskell_college_handouts.pdf";
     assertThrows(
             InvalidPathnameException.class,
-            () -> new Validator().validate(new String[] {"-f", dir})
+            () -> new Validator().validate(new String[] {dir})
     );
   }
 
   @Test
-  void validateFailsWhenNoFlagHaskellFileGiven()
+  void validateFailsWhenNonExistingHaskellFileGiven()
           throws InvalidPathnameException, InvalidCommandException {
-    String dir = pathToTestResources + "/haskell-project/individual.hs";
+    String dir = pathToTestResources + "/haskell-project/hello.hs";
     assertThrows(
             InvalidPathnameException.class,
             () -> new Validator().validate(new String[] {dir}));
@@ -82,14 +82,6 @@ class ValidatorTest {
   void validateFailsWhenNoArgumentGiven() {
     assertThrows(
         InvalidCommandException.class, () -> new Validator().validate(new String[] {}));
-  }
-
-  @Test
-  void validateFailsWhenExistingFileGiven() {
-    String dir = pathToTestResources + "/haskell-project/individual.hs";
-
-    assertThrows(
-        InvalidPathnameException.class, () -> new Validator().validate(new String[] {dir}));
   }
 
   @Test

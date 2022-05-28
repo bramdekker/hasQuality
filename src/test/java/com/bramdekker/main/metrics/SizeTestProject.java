@@ -4,28 +4,30 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.bramdekker.main.resources.FileList;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-
 // test-project
 // 62 + 76 = 138 lines in total
 // 12 + 15 = 27 blank lines
-// 138 - 27 = 111 = LOC
+// 111 = LOC
+// (50 + 61) / 2 = 55.5 avg module size
+// 61 = max module size
 // 31 + 27 = 58 comment lines
 // 53 code lines
 // Size in bytes: 2.683 + 2.146 = 4829 bytes
 // Size in characters: 4829 characters
 // Executable statements: 49
 // Delivered Source instructions: 53
-class SizeTest {
+class SizeTestProject {
   static String pathToTestResources;
   static String sizeSection;
 
   @BeforeAll
-  public static void setup() throws FileNotFoundException {
+  public static void setup() throws IOException {
     Path resourceDirectory = Paths.get("src", "test", "resources");
     pathToTestResources = resourceDirectory.toFile().getAbsolutePath();
     FileList.init(pathToTestResources + "/haskell-project");
