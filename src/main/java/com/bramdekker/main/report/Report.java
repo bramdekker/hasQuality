@@ -3,6 +3,8 @@ package com.bramdekker.main.report;
 import com.bramdekker.main.configuration.Configuration;
 import com.bramdekker.main.metrics.MetricType;
 import com.bramdekker.main.resources.FileList;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 /**
  * Class that assembles the final report. It contains sections with metrics measuring the same
@@ -10,11 +12,7 @@ import com.bramdekker.main.resources.FileList;
  */
 public class Report {
   private String report;
-  private Configuration config;
-
-  public Report() {
-    this.report = "";
-  }
+  private final Configuration config;
 
   /**
    * Constructor that takes as argument a Configuration instance. It also initialized the report
@@ -30,12 +28,12 @@ public class Report {
 
   /** Initialize the resources with information they need to generate the resources. */
   private void initializeResources() {
-    FileList.init(config.getDirectory());
+    FileList.init(config.getPathname());
   }
 
   /** Prints out the report in sections. */
-  public void display() {
-    System.out.println(String.format("Report for Haskell project %s\n", config.getDirectory()));
+  public void display() throws IOException {
+    System.out.printf("Report for %s\n%n", config.getPathname());
     for (MetricType metric : config.getMetrics()) {
       System.out.println(metric.getSection());
       System.out.println();

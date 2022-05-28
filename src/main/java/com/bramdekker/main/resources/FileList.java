@@ -15,7 +15,7 @@ import java.util.List;
 public class FileList {
   private static FileList instance;
   private List<File> haskellFiles = Collections.emptyList();
-  private static String directory;
+  private static String pathname;
 
   /** Private constructor to make it singleton. */
   private FileList() {}
@@ -28,7 +28,13 @@ public class FileList {
   private static FileList generateInstance() {
     FileList newFileList = new FileList();
 
-    newFileList.setHaskellFiles(newFileList.getHaskellFilesFromDir(directory));
+    // If the pathname is a Haskell file, set this file as the file list.
+    if (pathname.endsWith(".hs")) {
+      newFileList.setHaskellFiles(List.of(new File(pathname)));
+      return newFileList;
+    }
+
+    newFileList.setHaskellFiles(newFileList.getHaskellFilesFromDir(pathname));
 
     return newFileList;
   }
@@ -76,10 +82,10 @@ public class FileList {
   /**
    * Initializes the static variable directory.
    *
-   * @param dir the value with which the directory variable is initialized.
+   * @param newPathname the value with which the directory variable is initialized.
    */
-  public static void init(String dir) {
-    directory = dir;
+  public static void init(String newPathname) {
+    pathname = newPathname;
   }
 
   /**

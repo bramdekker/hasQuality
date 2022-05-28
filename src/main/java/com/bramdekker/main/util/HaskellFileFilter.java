@@ -11,6 +11,6 @@ import java.io.FilenameFilter;
 public class HaskellFileFilter implements FilenameFilter {
   @Override
   public boolean accept(File file, String s) {
-    return s.endsWith(".hs") || s.endsWith(".lhs");
+    return s.endsWith(".hs");
   }
 }

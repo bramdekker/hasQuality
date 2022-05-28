@@ -26,9 +26,9 @@ class HaskellFileFilterTest {
   }
 
   @Test
-  void acceptTrueOnHaskellFile2() {
+  void acceptFalseOnLiteralHaskellFile() {
     File haskellFile = new File(pathToTestResources + "/haskell-project");
-    assertTrue(new HaskellFileFilter().accept(haskellFile, "individual.lhs"));
+    assertFalse(new HaskellFileFilter().accept(haskellFile, "individual.lhs"));
   }
 
   @Test

@@ -10,7 +10,7 @@ import java.util.Arrays;
 
 /**
  * Provides methods for validating the pathname entered by the user. The pathname should point to a
- * directory that exists and contains at least 1 Haskell file (.hs or .lhs extension).
+ * directory that exists and contains at least 1 Haskell file (.hs extension).
  */
 public class Validator {
   private static final FilenameFilter haskellFilter = new HaskellFileFilter();
@@ -31,7 +31,7 @@ public class Validator {
     }
 
     // Check for help flag and just return if it is.
-    if (args[0].equals("-h") || args[0].equals("--help")) {
+    if (Arrays.stream(args).anyMatch(arg -> arg.equals("-h") || arg.equals("--help"))) {
       printHelp();
       return false;
     }
@@ -39,9 +39,20 @@ public class Validator {
     // Get the pathname from all the arguments.
     String rawPathname = getPathname(args);
     File pathname = new File(rawPathname);
-    if (!isDirectory(pathname)) {
+
+    // If the pathname is a file, check if it is a Haskell file.
+    if (pathname.isFile() && !isHaskellFile(pathname)) {
+      throw new InvalidPathnameException("The given file must be a Haskell file!");
+    } else if (pathname.isFile()) {
+      return true;
+    }
+
+    if (!pathname.isDirectory()) {
       throw new InvalidPathnameException("Pathname must point to an existing directory!");
     }
+
+    // If the pathname is a directory, check if it is an existing directory containing Haskell
+    // code.
     if (!dirContainsHaskell(pathname)) {
       throw new InvalidPathnameException("Directory must contain at least 1 Haskell file!");
     }
@@ -95,7 +106,7 @@ public class Validator {
    * @param arg command line argument
    * @return true if arg is a flag; false otherwise.
    */
-  private Boolean isFlag(String arg) {
+  private boolean isFlag(String arg) {
     return arg.startsWith("-");
   }
 
@@ -105,18 +116,19 @@ public class Validator {
    * @param args array of Strings containing all command line arguments.
    * @return true if there is exactly 1 command line argument; false otherwise.
    */
-  private Boolean hasNoArgument(String[] args) {
+  private boolean hasNoArgument(String[] args) {
     return args.length < 1;
   }
 
   /**
-   * Check if a File object is an existing directory.
+   * Checks if the given File object is a Haskell file.
    *
-   * @param projectPath File object representing a Haskell project directory.
-   * @return true if path is an existing directory; false otherwise.
+   * @param file the to be inspected File object.
+   * @return true if it is a Haskell file; false otherwise.
    */
-  private Boolean isDirectory(File projectPath) {
-    return projectPath.isDirectory();
+  private boolean isHaskellFile(File file) {
+    String fileString = file.toString();
+    return fileString.endsWith(".hs");
   }
 
   /**
@@ -125,7 +137,7 @@ public class Validator {
    * @param projectPath File object representing a Haskell project directory.
    * @return true if projectPath contains a Haskell file.
    */
-  private Boolean dirContainsHaskell(File projectPath) {
+  private boolean dirContainsHaskell(File projectPath) {
     // Get all Haskell files in the directory.
     File[] files = projectPath.listFiles(haskellFilter);
 
