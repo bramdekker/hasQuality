@@ -3,7 +3,7 @@ package com.bramdekker.main.report;
 import com.bramdekker.main.configuration.Configuration;
 import com.bramdekker.main.metrics.MetricType;
 import com.bramdekker.main.resources.FileList;
-import java.io.FileNotFoundException;
+
 import java.io.IOException;
 
 /**

@@ -1,16 +1,15 @@
 package com.bramdekker.main.metrics;
 
-import static com.bramdekker.main.util.MetricPrinter.getMetricString;
-
 import com.bramdekker.main.resources.FileList;
+import com.bramdekker.main.resources.HaskellParseTree;
+import org.antlr.v4.runtime.tree.ParseTree;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-import java.util.Scanner;
+import java.util.*;
+
+import static com.bramdekker.main.util.MetricPrinter.getMetricString;
 
 // - lines of code (LOC)
 //      -> noncommented lines (NCLOC)
@@ -28,9 +27,12 @@ import java.util.Scanner;
 // - number in bytes
 // - graph with modules/statements as nodes and control flow/data links as edges
 
+// - headings: imports + pragmas + all lines between module and where
+// - data declarations = type synonyms + algebraic data types
+
 /** Collection of methods that determine size metrics. */
 public class Size {
-  private static List<FileMetric> dataPerFile = new ArrayList<>();
+  private static final List<FileMetric> dataPerFile = new ArrayList<>();
   private static long loc;
   private static long blankLines;
   private static long ncloc;
@@ -45,7 +47,6 @@ public class Size {
   private static long maxModuleSize;
   private static String maxModuleName;
 
-
   /**
    * Generate the section for size metrics.
    *
@@ -59,9 +60,12 @@ public class Size {
     sizeSection.append(getMetricString("LOC", loc));
     sizeSection.append(getMetricString("NCLOC", ncloc));
     sizeSection.append(getMetricString("CLOC", cloc));
+    sizeSection.append(getMetricString("Executable statements", es));
+    sizeSection.append(getMetricString("Delivered source instructions", dsi));
     sizeSection.append(getMetricString("Blank lines", blankLines));
     sizeSection.append(getMetricString("Size in bytes", bytes));
     sizeSection.append(getMetricString("Size in characters", chars));
+    sizeSection.append(getMetricString("Number of nodes in the parse tree", parseTreeSize));
 
     if (dataPerFile.size() > 1) {
       sizeSection.append(getMetricString("Average module size (NCLOC)", avgModuleSize));
@@ -72,9 +76,7 @@ public class Size {
     return sizeSection.toString();
   }
 
-  /**
-   * Initializing all static variables of the class by setting them to 0.
-   */
+  /** Initializing all static variables of the class by setting them to 0. */
   private static void initializeMetrics() {
     loc = 0;
     cloc = 0;
@@ -90,15 +92,16 @@ public class Size {
     maxModuleSize = 0;
   }
 
-  // TODO: use parse tree to determine data declaration and header to calculate DSI / ES.
-
   /**
-   * Calculate all size metrics and store them as static variables.
+   * Collect all data per file needed to calculate metrics.
    *
    * @throws FileNotFoundException when a file in the FileList resource cannot be found.
    */
   private static void collectFileData() throws IOException {
     for (File file : FileList.getInstance().getHaskellFiles()) {
+      boolean inModuleExports = false;
+      boolean inTypeSynonymOrDataType = false;
+
       Scanner curFileScanner = new Scanner(file);
       String curLine;
       int charsInFile = 0;
@@ -113,8 +116,20 @@ public class Size {
         // Line separator is excluded from nextLine, hence the +1.
         charsInFile += curLine.length() + 1;
 
+        if (curLine.startsWith("module ")) {
+          inModuleExports = true;
+        } else if (curLine.startsWith("data ") || curLine.startsWith("type ")) {
+          inTypeSynonymOrDataType = true;
+        }
+
         if (!isBlank(curLine)) {
-          if (isComment(curLine)) {
+          if (inModuleExports || isImportOrPragma(curLine)) { // Heading
+            nclocInFile++;
+            dsiInFile++;
+          } else if (inTypeSynonymOrDataType) { // Data declaration
+            nclocInFile++;
+            dsiInFile++;
+          } else if (isComment(curLine)) { // Comment
             clocInFile++;
           } else { // Code line
             nclocInFile++;
@@ -124,9 +139,18 @@ public class Size {
         } else {
           blanklinesInFile++;
         }
+
+        if (inModuleExports && isEndOfModuleExport(curLine)) {
+          inModuleExports = false;
+        }
+
+        if (inTypeSynonymOrDataType && isEndOfTypeSynonymOrDataType(curLine)) {
+          inTypeSynonymOrDataType = false;
+        }
       }
 
-      dataPerFile.add(new FileMetric(
+      dataPerFile.add(
+          new FileMetric(
               file.getCanonicalPath(),
               file.length(),
               charsInFile,
@@ -134,29 +158,64 @@ public class Size {
               nclocInFile,
               blanklinesInFile,
               esInFile,
-              dsiInFile
-      ));
+              dsiInFile));
 
       curFileScanner.close();
     }
   }
 
-  private static void calculateMetrics() throws FileNotFoundException {
+  /**
+   * Calculate all size metrics and store them as static variables.
+   *
+   * @throws FileNotFoundException when a file in the FileList resource cannot be found.
+   */
+  private static void calculateMetrics() throws IOException {
     initializeMetrics();
 
     sumFileData();
 
+    parseTreeSize = calculateParseTreeSize();
     loc = ncloc + cloc;
     avgModuleSize = (long) Math.ceil((double) ncloc / dataPerFile.size());
-    Optional<FileMetric> maxSize = dataPerFile.stream().max(
-            Comparator.comparingLong(a -> a.ncloc)
-    );
+    Optional<FileMetric> maxSize = dataPerFile.stream().max(Comparator.comparingLong(a -> a.ncloc));
     if (maxSize.isPresent()) {
       maxModuleSize = maxSize.get().ncloc;
       maxModuleName = maxSize.get().name;
     }
   }
 
+  /**
+   * Calculate the number of nodes in the parse tree.
+   *
+   * @return long representing the number of nodes in the parse tree.
+   * @throws FileNotFoundException when a file in the FileList resource cannot be found.
+   */
+  private static long calculateParseTreeSize() throws IOException {
+    long totalParseTreeSize = 0;
+    for (ParseTree tree : HaskellParseTree.getInstance().getTreeDict().values()) {
+      totalParseTreeSize += getChildren(tree) + 1;
+    }
+
+    return totalParseTreeSize;
+  }
+
+  /**
+   * Get the number of children of a ParseTree node.
+   *
+   * @param node ParseTree where the number of children is calculated for.
+   * @return long representing the number of children of node.
+   */
+  private static long getChildren(ParseTree node) {
+    long childCount = 0;
+
+    for (int i = 0; i < node.getChildCount(); i++) {
+      childCount += getChildren(node.getChild(i)) + 1;
+    }
+
+    return childCount;
+  }
+
+  /** Sum the data per file to get overall metrics. */
   private static void sumFileData() {
     for (FileMetric metric : dataPerFile) {
       bytes += metric.bytes;
@@ -195,18 +254,16 @@ public class Size {
    * @param line String representing a line.
    * @return true if line is a header line; false otherwise.
    */
-  private static boolean isHeader(String line) {
-    return line.startsWith("import") || line.startsWith("where") || line.startsWith("module");
+  private static boolean isImportOrPragma(String line) {
+    return line.startsWith("import ") || line.startsWith("{-#");
   }
 
-  /**
-   * Checks whether a line is a data declaration.
-   *
-   * @param line String representing a line.
-   * @return true if line is a data declaration; false otherwise.
-   */
-  private static boolean isDataDeclaration(String line) {
-    return false;
+  private static boolean isEndOfModuleExport(String line) {
+    return line.equals("where") || line.endsWith(" where") || line.contains(" where ");
+  }
+
+  private static boolean isEndOfTypeSynonymOrDataType(String line) {
+    return !Character.isWhitespace(line.charAt(0));
   }
 
   /**

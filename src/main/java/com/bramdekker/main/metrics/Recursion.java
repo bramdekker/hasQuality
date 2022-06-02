@@ -8,6 +8,6 @@ public class Recursion {
    * @return a report section containing information about recursion metrics as String.
    */
   public static String getSection() {
-    return "This is the RECURSION section!";
+    return "Recursion metrics:";
   }
 }

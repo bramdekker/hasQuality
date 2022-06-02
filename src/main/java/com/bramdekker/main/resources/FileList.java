@@ -2,6 +2,7 @@ package com.bramdekker.main.resources;
 
 import com.bramdekker.main.util.HaskellFileFilter;
 import com.bramdekker.main.util.SubdirectoryFilter;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -94,11 +95,10 @@ public class FileList {
    * @return the singleton FileList instance.
    */
   public static FileList getInstance() {
-    if (instance != null) {
-      return instance;
+    if (instance == null) {
+      instance = generateInstance();
     }
 
-    instance = generateInstance();
     return instance;
   }
 

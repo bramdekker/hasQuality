@@ -1,15 +1,14 @@
 package com.bramdekker.main.metrics;
 
-//import static org.junit.jupiter.api.Assertions.assertTrue;
+// import static org.junit.jupiter.api.Assertions.assertTrue;
 //
-//import com.bramdekker.main.resources.FileList;
-//import java.io.FileNotFoundException;
-//import java.io.IOException;
-//import java.nio.file.Path;
-//import java.nio.file.Paths;
-//import org.junit.jupiter.api.BeforeAll;
-//import org.junit.jupiter.api.Test;
-
+// import com.bramdekker.main.resources.FileList;
+// import java.io.FileNotFoundException;
+// import java.io.IOException;
+// import java.nio.file.Path;
+// import java.nio.file.Paths;
+// import org.junit.jupiter.api.BeforeAll;
+// import org.junit.jupiter.api.Test;
 
 // individual.hs
 // 76 lines in total
@@ -21,7 +20,7 @@ package com.bramdekker.main.metrics;
 // Size in characters: 2683 characters
 // Executable statements: 28
 // Delivered Source instructions: 30
-//class SizeTestFile {
+// class SizeTestFile {
 //  static String pathToTestResources;
 //  static String sizeSection;
 //
@@ -62,4 +61,4 @@ package com.bramdekker.main.metrics;
 //  void sizeInCharactersMeasureIsCorrect() {
 //    assertTrue(sizeSection.contains("Size in characters: 2683"));
 //  }
-//}
+// }

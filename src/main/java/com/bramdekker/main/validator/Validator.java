@@ -4,6 +4,7 @@ import com.bramdekker.main.exceptions.InvalidCommandException;
 import com.bramdekker.main.exceptions.InvalidPathnameException;
 import com.bramdekker.main.util.HaskellFileFilter;
 import com.bramdekker.main.util.SubdirectoryFilter;
+
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.Arrays;

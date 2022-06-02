@@ -1,13 +1,14 @@
 package com.bramdekker.main.configuration;
 
-import static com.bramdekker.main.metrics.MetricType.RECURSION;
-import static com.bramdekker.main.metrics.MetricType.SIZE;
-
 import com.bramdekker.main.exceptions.InvalidCommandException;
 import com.bramdekker.main.metrics.MetricType;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import static com.bramdekker.main.metrics.MetricType.RECURSION;
+import static com.bramdekker.main.metrics.MetricType.SIZE;
 
 /**
  * Sets up the configuration for the report and metrics based on the flags specified in the command.

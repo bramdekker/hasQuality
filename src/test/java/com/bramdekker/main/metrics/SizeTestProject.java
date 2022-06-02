@@ -1,14 +1,14 @@
 package com.bramdekker.main.metrics;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import com.bramdekker.main.resources.FileList;
-import java.io.FileNotFoundException;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 // test-project
 // 62 + 76 = 138 lines in total
@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Test;
 // 53 code lines
 // Size in bytes: 2.683 + 2.146 = 4829 bytes
 // Size in characters: 4829 characters
-// Executable statements: 49
+// Executable statements: 27 + 21 = 48
 // Delivered Source instructions: 53
 class SizeTestProject {
   static String pathToTestResources;
@@ -47,6 +47,16 @@ class SizeTestProject {
   @Test
   void clocMeasureIsCorrect() {
     assertTrue(sizeSection.contains("CLOC: 58"));
+  }
+
+  @Test
+  void esMeasureIsCorrect() {
+    assertTrue(sizeSection.contains("Executable statements: 48"));
+  }
+
+  @Test
+  void dsiMeasureIsCorrect() {
+    assertTrue(sizeSection.contains("Delivered source instructions: 53"));
   }
 
   @Test
