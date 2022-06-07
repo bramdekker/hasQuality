@@ -7,8 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.bramdekker.main.metrics.MetricType.RECURSION;
-import static com.bramdekker.main.metrics.MetricType.SIZE;
+import static com.bramdekker.main.metrics.MetricType.*;
 
 /**
  * Sets up the configuration for the report and metrics based on the flags specified in the command.
@@ -38,6 +37,12 @@ public class Configuration {
           break;
         case "-r":
           this.metrics.add(RECURSION);
+          break;
+        case "-p":
+          this.metrics.add(PATTERNS);
+          break;
+        case "-u":
+          this.metrics.add(USABILITY);
           break;
         default:
           throw new InvalidCommandException("Unknown flag used!");

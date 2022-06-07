@@ -72,6 +72,8 @@ public class Validator {
                 Flags:
                     -s              Compute and report on size metrics
                     -r              Compute and report on recursion metrics
+                    -p              Compute and report on pattern metrics
+                    -u              Compute and report on usability metrics
                     -h / --help     Show this help message
                 """;
     System.out.println(helpMessage.trim());

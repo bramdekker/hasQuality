@@ -16,6 +16,16 @@ public enum MetricType {
     public String getSection() {
       return Recursion.getSection();
     }
+  },
+  PATTERNS {
+    public String getSection() {
+      return Patterns.getSection();
+    }
+  },
+  USABILITY {
+    public String getSection() {
+      return Usability.getSection();
+    }
   };
 
   public abstract String getSection() throws IOException;

@@ -55,7 +55,7 @@ public class Size {
   public static String getSection() throws IOException {
     collectFileData();
     calculateMetrics();
-    StringBuilder sizeSection = new StringBuilder("Size metrics: \n");
+    StringBuilder sizeSection = new StringBuilder("Size metrics:\n");
 
     sizeSection.append(getMetricString("LOC", loc));
     sizeSection.append(getMetricString("NCLOC", ncloc));
