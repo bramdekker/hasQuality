@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 // test-project
 // Halstead length: 292 + 205 = 497
@@ -24,36 +24,35 @@ import static org.junit.jupiter.api.Assertions.*;
 // maxHalsteadVolume:
 // maxHalsteadVolumeName:
 class HalsteadTest {
-    static String pathToTestResources;
-    static String halsteadSection;
+  static String pathToTestResources;
+  static String halsteadSection;
 
-    @BeforeAll
-    public static void setup() throws IOException {
-        Path resourceDirectory = Paths.get("src", "test", "resources");
-        pathToTestResources = resourceDirectory.toFile().getAbsolutePath();
-        FileList.init(pathToTestResources + "/haskell-project");
-        halsteadSection = Halstead.getSection();
-        System.out.println(halsteadSection);
-    }
+  @BeforeAll
+  public static void setup() throws IOException {
+    Path resourceDirectory = Paths.get("src", "test", "resources");
+    pathToTestResources = resourceDirectory.toFile().getAbsolutePath();
+    FileList.init(pathToTestResources + "/haskell-project");
+    halsteadSection = Halstead.getSection();
+    System.out.println(halsteadSection);
+  }
 
-    @Test
-    void halsteadLengthMeasureIsCorrect() {
-        assertTrue(halsteadSection.contains("Halstead length: 497"));
-    }
+  @Test
+  void halsteadLengthMeasureIsCorrect() {
+    assertTrue(halsteadSection.contains("Halstead length: 497"));
+  }
 
-    @Test
-    void avgHalsteadLengthIsCorrect() {
-        assertTrue(halsteadSection.contains("Average Halstead length: 249"));
-    }
+  @Test
+  void avgHalsteadLengthIsCorrect() {
+    assertTrue(halsteadSection.contains("Average Halstead length: 249"));
+  }
 
-    @Test
-    void maxHalsteadLengthIsCorrect() {
-        assertTrue(halsteadSection.contains("Maximum Halstead length: 292"));
-    }
+  @Test
+  void maxHalsteadLengthIsCorrect() {
+    assertTrue(halsteadSection.contains("Maximum Halstead length: 292"));
+  }
 
-
-    @Test
-    void maxModuleSizeNameIsCorrect() {
-        assertTrue(halsteadSection.matches("(?s).*Maximum Halstead length file:.*/individual.hs$"));
-    }
+  @Test
+  void maxModuleSizeNameIsCorrect() {
+    assertTrue(halsteadSection.matches("(?s).*Maximum Halstead length file:.*/individual.hs$"));
+  }
 }
