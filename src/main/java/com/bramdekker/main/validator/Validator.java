@@ -32,7 +32,7 @@ public class Validator {
     }
 
     // Check for help flag and just return if it is.
-    if (Arrays.stream(args).anyMatch(arg -> arg.equals("-h") || arg.equals("--help"))) {
+    if (Arrays.stream(args).anyMatch(arg -> arg.equals("--help"))) {
       printHelp();
       return false;
     }
@@ -72,7 +72,8 @@ public class Validator {
                 Flags:
                     -s              Compute and report on size metrics
                     -r              Compute and report on recursion metrics
-                    -h / --help     Show this help message
+                    -h              Compute and report on Halstead metrics
+                    --help          Show this help message
                 """;
     System.out.println(helpMessage.trim());
   }

@@ -2,7 +2,7 @@ package com.bramdekker.main.metrics;
 
 import com.bramdekker.main.resources.FileList;
 import com.bramdekker.main.resources.HaskellParseTree;
-import com.bramdekker.main.util.CustomListener;
+import com.bramdekker.main.util.HalsteadVisitor;
 import org.antlr.v4.runtime.tree.ParseTree;
 
 import java.io.File;
@@ -10,6 +10,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
 
+import static com.bramdekker.main.util.MathUtil.logN;
 import static com.bramdekker.main.util.MetricPrinter.getMetricString;
 
 // - lines of code (LOC)
@@ -27,13 +28,6 @@ import static com.bramdekker.main.util.MetricPrinter.getMetricString;
 // - number of characters (wc -m <filename>)
 // - number in bytes
 // - graph with modules/statements as nodes and control flow/data links as edges
-// conid/varid/literal = operands
-// rhs/sigdecl/typedoc/ascSymbol(bool + arithmetic) = operators
-// - Halstead length: total occurrences of operators + total occurrences of operands
-// - Halstead vocabulary: number of unique operators + number of unique operands
-// - Halstead volume: N * log2(u)
-// - headings: imports + pragmas + all lines between module and where
-// - data declarations = type synonyms + algebraic data types
 
 /** Collection of methods that determine size metrics. */
 public class Size {
@@ -46,9 +40,6 @@ public class Size {
   private static long es;
   private static long bytes;
   private static long chars;
-  private static long halsteadLength;
-  private static long halsteadVocabulary;
-  private static long halsteadVolume;
   private static long graphSize;
   private static long parseTreeSize;
   private static long avgModuleSize;
@@ -72,9 +63,6 @@ public class Size {
     sizeSection.append(getMetricString("Delivered source instructions", dsi));
     sizeSection.append(getMetricString("Blank lines", blankLines));
     sizeSection.append(getMetricString("Size in bytes", bytes));
-    sizeSection.append(getMetricString("Total Halstead length", halsteadLength));
-    sizeSection.append(getMetricString("Total Halstead vocabulary", halsteadVocabulary));
-    sizeSection.append(getMetricString("Total Halstead volume", halsteadVolume));
     sizeSection.append(getMetricString("Size in characters", chars));
     sizeSection.append(getMetricString("Number of nodes in the parse tree", parseTreeSize));
 
@@ -99,9 +87,6 @@ public class Size {
     parseTreeSize = 0;
     bytes = 0;
     chars = 0;
-    halsteadLength = 0;
-    halsteadVocabulary = 0;
-    halsteadVolume = 0;
     avgModuleSize = 0;
     maxModuleSize = 0;
   }
@@ -109,7 +94,7 @@ public class Size {
   /**
    * Collect all data per file needed to calculate metrics.
    *
-   * @throws FileNotFoundException when a file in the FileList resource cannot be found.
+   * @throws IOException when a file in the FileList resource cannot be found.
    */
   private static void collectFileData() throws IOException {
     for (File file : FileList.getInstance().getHaskellFiles()) {
@@ -163,11 +148,6 @@ public class Size {
         }
       }
 
-      ParseTree parseTree = HaskellParseTree.getInstance()
-              .getTreeDict().get(file.getCanonicalPath());
-      CustomListener listener = new CustomListener();
-      listener.createHalsteadMaps(parseTree);
-
       dataPerFile.add(
           new FileMetric(
               file.getCanonicalPath(),
@@ -177,9 +157,7 @@ public class Size {
               nclocInFile,
               blanklinesInFile,
               esInFile,
-              dsiInFile,
-              listener.getHalsteadLength(),
-              listener.getHalsteadVocabulary()));
+              dsiInFile));
 
       curFileScanner.close();
     }
@@ -188,7 +166,7 @@ public class Size {
   /**
    * Calculate all size metrics and store them as static variables.
    *
-   * @throws FileNotFoundException when a file in the FileList resource cannot be found.
+   * @throws IOException when a file in the FileList resource cannot be found.
    */
   private static void calculateMetrics() throws IOException {
     initializeMetrics();
@@ -197,8 +175,6 @@ public class Size {
 
     parseTreeSize = calculateParseTreeSize();
     loc = ncloc + cloc;
-    // TODO: should be log2
-    halsteadVolume = (long) (halsteadLength * Math.log(halsteadVocabulary));
     avgModuleSize = (long) Math.ceil((double) ncloc / dataPerFile.size());
     Optional<FileMetric> maxSize = dataPerFile.stream().max(Comparator.comparingLong(a -> a.ncloc));
     if (maxSize.isPresent()) {
@@ -248,9 +224,6 @@ public class Size {
       blankLines += metric.blankLines;
       es += metric.es;
       dsi += metric.dsi;
-      halsteadLength += metric.halsteadLength;
-      // TODO: is this the right way to calculate the unique occurrences.
-      halsteadVocabulary += metric.halsteadVocabulary;
     }
   }
 
