@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 // 30 = max module size
 // 31 + 27 = 58 comment lines
 // 53 code lines
-// Size in bytes: 2.683 + 2.146 = 4829 bytes
+// Size in bytes: 2.683 + 2.146= 4829 bytes
 // Size in characters: 4829 characters
 // Executable statements: 27 + 21 = 48
 // Delivered Source instructions: 53
@@ -33,6 +33,7 @@ class SizeTest {
     pathToTestResources = resourceDirectory.toFile().getAbsolutePath();
     FileList.init(pathToTestResources + "/haskell-project");
     sizeSection = Size.getSection();
+    System.out.println(sizeSection);
   }
 
   @Test

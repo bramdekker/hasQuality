@@ -50,12 +50,6 @@ class ValidatorTest {
   @Test
   void validateReturnsFalseWhenHelpFlagIsUsed()
       throws InvalidPathnameException, InvalidCommandException {
-    assertFalse(new Validator().validate(new String[] {"-h"}));
-  }
-
-  @Test
-  void validateReturnsFalseWhenHelpFlagIsUsed2()
-      throws InvalidPathnameException, InvalidCommandException {
     assertFalse(new Validator().validate(new String[] {"--help"}));
   }
 
