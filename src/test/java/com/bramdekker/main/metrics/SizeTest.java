@@ -88,6 +88,6 @@ class SizeTest {
 
   @Test
   void maxModuleSizeNameIsCorrect() {
-    assertTrue(sizeSection.matches("(?s).*Biggest module:.*/individual.hs$"));
+    assertTrue(sizeSection.matches("(?s).*Maximum module size file: .*/individual.hs.*$"));
   }
 }

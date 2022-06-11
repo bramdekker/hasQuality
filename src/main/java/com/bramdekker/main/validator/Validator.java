@@ -71,9 +71,9 @@ public class Validator {
                 
                 Flags:
                     -s              Compute and report on size metrics.
-                    -r              Compute and report on recursion metrics.
+                    -rc             Compute and report on recursion metrics.
                     -p              Compute and report on pattern metrics.
-                    -u              Compute and report on usability metrics.
+                    -rd             Compute and report on readability metrics.
                     -h              Compute and report on Halstead metrics.
                     --help          Show this help message.
                 """;

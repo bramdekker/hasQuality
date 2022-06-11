@@ -27,9 +27,9 @@ public enum MetricType {
       return Patterns.getSection();
     }
   },
-  USABILITY {
-    public String getSection() {
-      return Usability.getSection();
+  READABILITY {
+    public String getSection() throws IOException {
+      return Readability.getSection();
     }
   };
 

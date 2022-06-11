@@ -33,9 +33,9 @@ public class Configuration {
     for (int i = 0; i < args.length - 1; i++) {
       switch (args[i]) {
         case "-s" -> this.metrics.add(SIZE);
-        case "-r" -> this.metrics.add(RECURSION);
+        case "-rc" -> this.metrics.add(RECURSION);
         case "-p" -> this.metrics.add(PATTERNS);
-        case "-u" -> this.metrics.add(USABILITY);
+        case "-rd" -> this.metrics.add(READABILITY);
         case "-h" -> this.metrics.add(HALSTEAD);
         default -> throw new InvalidCommandException("Unknown flag used!");
       }

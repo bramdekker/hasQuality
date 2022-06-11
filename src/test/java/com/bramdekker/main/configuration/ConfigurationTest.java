@@ -32,7 +32,7 @@ class ConfigurationTest {
   @Test
   void getDirectoryReturnsLastCommandLineArgumentMultipleFlags() throws InvalidCommandException {
     String dirName = "/just/some/test/directory";
-    String[] args = new String[] {"-s", "-r", dirName};
+    String[] args = new String[] {"-s", "-rc", dirName};
 
     assertEquals(dirName, new Configuration(args).getPathname());
   }
@@ -48,6 +48,6 @@ class ConfigurationTest {
   void getMetricsReturnsOnlySpecifiedMetrics() throws InvalidCommandException {
     assertEquals(
         List.of(MetricType.RECURSION),
-        new Configuration(new String[] {"-r", "test-dir"}).getMetrics());
+        new Configuration(new String[] {"-rc", "test-dir"}).getMetrics());
   }
 }
