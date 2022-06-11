@@ -2,7 +2,6 @@ package com.bramdekker.main.metrics;
 
 import com.bramdekker.main.resources.FileList;
 import com.bramdekker.main.resources.HaskellParseTree;
-import com.bramdekker.main.util.HalsteadVisitor;
 import org.antlr.v4.runtime.tree.ParseTree;
 
 import java.io.File;
@@ -10,7 +9,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
 
-import static com.bramdekker.main.util.MathUtil.logN;
 import static com.bramdekker.main.util.MetricPrinter.getMetricString;
 
 // - lines of code (LOC)
@@ -31,20 +29,20 @@ import static com.bramdekker.main.util.MetricPrinter.getMetricString;
 
 /** Collection of methods that determine size metrics. */
 public class Size {
-  private static final List<FileMetric> dataPerFile = new ArrayList<>();
-  private static long loc;
-  private static long blankLines;
-  private static long ncloc;
-  private static long cloc;
-  private static long dsi;
-  private static long es;
-  private static long bytes;
-  private static long chars;
-  private static long graphSize;
-  private static long parseTreeSize;
-  private static long avgModuleSize;
-  private static long maxModuleSize;
-  private static String maxModuleName;
+  private static final List<SizeFileMetric> dataPerFile = new ArrayList<>();
+  private static long loc = 0;
+  private static long blankLines = 0;
+  private static long ncloc = 0;
+  private static long cloc = 0;
+  private static long dsi = 0;
+  private static long es = 0;
+  private static long bytes = 0;
+  private static long chars = 0;
+  private static long graphSize = 0;
+  private static long parseTreeSize = 0;
+  private static long avgModuleSize = 0;
+  private static long maxModuleSize = 0;
+  private static String maxModuleName = "";
 
   /**
    * Generate the section for size metrics.
@@ -52,9 +50,11 @@ public class Size {
    * @return a report section containing information about size metrics as String.
    */
   public static String getSection() throws IOException {
-    collectFileData();
+    if (dataPerFile.isEmpty()) {
+      collectFileData();
+    }
     calculateMetrics();
-    StringBuilder sizeSection = new StringBuilder("Size metrics: \n");
+    StringBuilder sizeSection = new StringBuilder("Size metrics:\n");
 
     sizeSection.append(getMetricString("LOC", loc));
     sizeSection.append(getMetricString("NCLOC", ncloc));
@@ -69,26 +69,10 @@ public class Size {
     if (dataPerFile.size() > 1) {
       sizeSection.append(getMetricString("Average module size (NCLOC)", avgModuleSize));
       sizeSection.append(getMetricString("Maximum module size (NCLOC)", maxModuleSize));
-      sizeSection.append(String.format("Biggest module: %s", maxModuleName));
+      sizeSection.append(getMetricString("Maximum module size file", maxModuleName));
     }
 
     return sizeSection.toString();
-  }
-
-  /** Initializing all static variables of the class by setting them to 0. */
-  private static void initializeMetrics() {
-    loc = 0;
-    cloc = 0;
-    ncloc = 0;
-    blankLines = 0;
-    dsi = 0;
-    es = 0;
-    graphSize = 0;
-    parseTreeSize = 0;
-    bytes = 0;
-    chars = 0;
-    avgModuleSize = 0;
-    maxModuleSize = 0;
   }
 
   /**
@@ -149,7 +133,7 @@ public class Size {
       }
 
       dataPerFile.add(
-          new FileMetric(
+          new SizeFileMetric(
               file.getCanonicalPath(),
               file.length(),
               charsInFile,
@@ -169,14 +153,14 @@ public class Size {
    * @throws IOException when a file in the FileList resource cannot be found.
    */
   private static void calculateMetrics() throws IOException {
-    initializeMetrics();
-
     sumFileData();
 
     parseTreeSize = calculateParseTreeSize();
     loc = ncloc + cloc;
     avgModuleSize = (long) Math.ceil((double) ncloc / dataPerFile.size());
-    Optional<FileMetric> maxSize = dataPerFile.stream().max(Comparator.comparingLong(a -> a.ncloc));
+    Optional<SizeFileMetric> maxSize = dataPerFile
+            .stream()
+            .max(Comparator.comparingLong(a -> a.ncloc));
     if (maxSize.isPresent()) {
       maxModuleSize = maxSize.get().ncloc;
       maxModuleName = maxSize.get().name;
@@ -216,7 +200,7 @@ public class Size {
 
   /** Sum the data per file to get overall metrics. */
   private static void sumFileData() {
-    for (FileMetric metric : dataPerFile) {
+    for (SizeFileMetric metric : dataPerFile) {
       bytes += metric.bytes;
       chars += metric.chars;
       cloc += metric.cloc;
@@ -380,5 +364,17 @@ public class Size {
    */
   public static String getMaxModuleName() {
     return maxModuleName;
+  }
+
+  /**
+   * Getter for the dataPerFile static variable. If not yet populated
+   *
+   * @return List of SizeFileMetric objects representing with size data per file.
+   */
+  public static List<SizeFileMetric> getDataPerFile() throws IOException {
+    if (dataPerFile.isEmpty()) {
+      collectFileData();
+    }
+    return dataPerFile;
   }
 }

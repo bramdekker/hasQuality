@@ -56,17 +56,17 @@ public class Halstead {
       halsteadSection.append(getMetricString("Average Halstead length", avgHalsteadLength));
       halsteadSection.append(getMetricString("Maximum Halstead length", maxHalsteadLength));
       halsteadSection.append(
-          String.format("Maximum Halstead length file: %s%n", maxHalsteadLengthName));
+          getMetricString("Maximum Halstead length file", maxHalsteadLengthName));
 
       halsteadSection.append(getMetricString("Average Halstead vocabulary", avgHalsteadVocabulary));
       halsteadSection.append(getMetricString("Maximum Halstead vocabulary", maxHalsteadVocabulary));
       halsteadSection.append(
-          String.format("Maximum Halstead vocabulary file: %s%n", maxHalsteadVocabularyName));
+          getMetricString("Maximum Halstead vocabulary file", maxHalsteadVocabularyName));
 
       halsteadSection.append(getMetricString("Average Halstead volume", avgHalsteadVolume));
       halsteadSection.append(getMetricString("Maximum Halstead volume", maxHalsteadVolume));
       halsteadSection.append(
-          String.format("Maximum Halstead volume file: %s", maxHalsteadVolumeName));
+          getMetricString("Maximum Halstead volume file", maxHalsteadVolumeName));
     }
 
     return halsteadSection.toString();

@@ -1,7 +1,6 @@
 package com.bramdekker.main.configuration;
 
 import com.bramdekker.main.exceptions.InvalidCommandException;
-import com.bramdekker.main.metrics.Halstead;
 import com.bramdekker.main.metrics.MetricType;
 
 import java.util.ArrayList;
@@ -33,17 +32,12 @@ public class Configuration {
     // Fill the list with metrics according to the flags set.
     for (int i = 0; i < args.length - 1; i++) {
       switch (args[i]) {
-        case "-s":
-          this.metrics.add(SIZE);
-          break;
-        case "-r":
-          this.metrics.add(RECURSION);
-          break;
-        case "-h":
-          this.metrics.add(HALSTEAD);
-          break;
-        default:
-          throw new InvalidCommandException("Unknown flag used!");
+        case "-s" -> this.metrics.add(SIZE);
+        case "-rc" -> this.metrics.add(RECURSION);
+        case "-p" -> this.metrics.add(PATTERNS);
+        case "-rd" -> this.metrics.add(READABILITY);
+        case "-h" -> this.metrics.add(HALSTEAD);
+        default -> throw new InvalidCommandException("Unknown flag used!");
       }
     }
 

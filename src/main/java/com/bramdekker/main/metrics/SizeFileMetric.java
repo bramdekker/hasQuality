@@ -1,7 +1,7 @@
 package com.bramdekker.main.metrics;
 
 /** Encapsulates data for a specific file. */
-public class FileMetric {
+public class SizeFileMetric {
   public String name;
   public long bytes;
   public long chars;
@@ -23,7 +23,7 @@ public class FileMetric {
    * @param es number of executable statements in the file.
    * @param dsi number of delivered source instruction in the file.
    */
-  public FileMetric(
+  public SizeFileMetric(
       String name,
       long bytes,
       long chars,

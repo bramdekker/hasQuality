@@ -53,6 +53,6 @@ class HalsteadTest {
 
   @Test
   void maxModuleSizeNameIsCorrect() {
-    assertTrue(halsteadSection.matches("(?s).*Maximum Halstead length file:.*/individual.hs$"));
+    assertTrue(halsteadSection.matches("(?s).*Maximum Halstead length file:.*/individual.hs.*$"));
   }
 }
