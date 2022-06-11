@@ -23,7 +23,7 @@ public enum MetricType {
     }
   },
   PATTERNS {
-    public String getSection() {
+    public String getSection() throws IOException {
       return Patterns.getSection();
     }
   },
