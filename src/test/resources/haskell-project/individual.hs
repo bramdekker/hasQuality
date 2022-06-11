@@ -53,7 +53,7 @@ getIndex' xs q = snd $ foldl (\i (j, y) -> if j == q then (j, y) else i)
 -- This function checks if the first and last element are the same. If that is
 -- true then the second and second-last element are compared.
 isPalindrome :: Eq a => [a] -> Bool
-isPalindrome x = x == reverse(x)
+isPalindrome x = x == reverse (x)
 
 -- This function returns a infinite list with fibonacci numbers.
 fibonacci :: [Int]
@@ -69,7 +69,7 @@ getList :: [Int] -> List
 getList lst = \i -> lst !! i
 
 -- This function adds elements to the type List = (Int) -> Int. It puts the
--- element to be added at the specified index. 
+-- element to be added at the specified index.
 addList :: List -> (Int) -> Int -> List
 addList lst ind elm nind | nind == ind = elm
                          | nind < ind = lst nind

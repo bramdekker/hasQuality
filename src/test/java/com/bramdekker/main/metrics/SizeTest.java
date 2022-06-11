@@ -14,15 +14,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 // 62 + 76 = 138 lines in total
 // 12 + 15 = 27 blank lines
 // 111 = LOC
-// (50 + 61) / 2 = 55.5 avg module size
-// 61 = max module size
+// (30 + 23) / 2 = 26.5 -> 27 avg module size
+// 30 = max module size
 // 31 + 27 = 58 comment lines
 // 53 code lines
-// Size in bytes: 2.683 + 2.146 = 4829 bytes
+// Size in bytes: 2.683 + 2.146= 4829 bytes
 // Size in characters: 4829 characters
 // Executable statements: 27 + 21 = 48
 // Delivered Source instructions: 53
-class SizeTestProject {
+// Biggest module: individual.hs
+class SizeTest {
   static String pathToTestResources;
   static String sizeSection;
 
@@ -32,6 +33,7 @@ class SizeTestProject {
     pathToTestResources = resourceDirectory.toFile().getAbsolutePath();
     FileList.init(pathToTestResources + "/haskell-project");
     sizeSection = Size.getSection();
+    System.out.println(sizeSection);
   }
 
   @Test
@@ -82,5 +84,10 @@ class SizeTestProject {
   @Test
   void maxModuleSizeMeasureIsCorrect() {
     assertTrue(sizeSection.contains("Maximum module size (NCLOC): 30"));
+  }
+
+  @Test
+  void maxModuleSizeNameIsCorrect() {
+    assertTrue(sizeSection.matches("(?s).*Biggest module:.*/individual.hs$"));
   }
 }

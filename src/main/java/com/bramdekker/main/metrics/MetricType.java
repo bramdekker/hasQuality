@@ -12,6 +12,11 @@ public enum MetricType {
       return Size.getSection();
     }
   },
+  HALSTEAD {
+    public String getSection() throws IOException {
+      return Halstead.getSection();
+    }
+  },
   RECURSION {
     public String getSection() {
       return Recursion.getSection();

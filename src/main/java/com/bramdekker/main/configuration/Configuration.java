@@ -32,20 +32,12 @@ public class Configuration {
     // Fill the list with metrics according to the flags set.
     for (int i = 0; i < args.length - 1; i++) {
       switch (args[i]) {
-        case "-s":
-          this.metrics.add(SIZE);
-          break;
-        case "-r":
-          this.metrics.add(RECURSION);
-          break;
-        case "-p":
-          this.metrics.add(PATTERNS);
-          break;
-        case "-u":
-          this.metrics.add(USABILITY);
-          break;
-        default:
-          throw new InvalidCommandException("Unknown flag used!");
+        case "-s" -> this.metrics.add(SIZE);
+        case "-r" -> this.metrics.add(RECURSION);
+        case "-p" -> this.metrics.add(PATTERNS);
+        case "-u" -> this.metrics.add(USABILITY);
+        case "-h" -> this.metrics.add(HALSTEAD);
+        default -> throw new InvalidCommandException("Unknown flag used!");
       }
     }
 

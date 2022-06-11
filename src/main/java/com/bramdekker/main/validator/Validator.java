@@ -32,7 +32,7 @@ public class Validator {
     }
 
     // Check for help flag and just return if it is.
-    if (Arrays.stream(args).anyMatch(arg -> arg.equals("-h") || arg.equals("--help"))) {
+    if (Arrays.asList(args).contains("--help")) {
       printHelp();
       return false;
     }
@@ -70,11 +70,12 @@ public class Validator {
                 USAGE: ./gradle run [flags] <path-to-haskell-project-dir>
                 
                 Flags:
-                    -s              Compute and report on size metrics
-                    -r              Compute and report on recursion metrics
-                    -p              Compute and report on pattern metrics
-                    -u              Compute and report on usability metrics
-                    -h / --help     Show this help message
+                    -s              Compute and report on size metrics.
+                    -r              Compute and report on recursion metrics.
+                    -p              Compute and report on pattern metrics.
+                    -u              Compute and report on usability metrics.
+                    -h              Compute and report on Halstead metrics.
+                    --help          Show this help message.
                 """;
     System.out.println(helpMessage.trim());
   }

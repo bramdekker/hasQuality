@@ -2,6 +2,7 @@ package com.bramdekker.main.metrics;
 
 import com.bramdekker.main.resources.FileList;
 import com.bramdekker.main.resources.HaskellParseTree;
+import com.bramdekker.main.util.HalsteadVisitor;
 import org.antlr.v4.runtime.tree.ParseTree;
 
 import java.io.File;
@@ -9,6 +10,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
 
+import static com.bramdekker.main.util.MathUtil.logN;
 import static com.bramdekker.main.util.MetricPrinter.getMetricString;
 
 // - lines of code (LOC)
@@ -26,9 +28,6 @@ import static com.bramdekker.main.util.MetricPrinter.getMetricString;
 // - number of characters (wc -m <filename>)
 // - number in bytes
 // - graph with modules/statements as nodes and control flow/data links as edges
-
-// - headings: imports + pragmas + all lines between module and where
-// - data declarations = type synonyms + algebraic data types
 
 /** Collection of methods that determine size metrics. */
 public class Size {
@@ -95,7 +94,7 @@ public class Size {
   /**
    * Collect all data per file needed to calculate metrics.
    *
-   * @throws FileNotFoundException when a file in the FileList resource cannot be found.
+   * @throws IOException when a file in the FileList resource cannot be found.
    */
   private static void collectFileData() throws IOException {
     for (File file : FileList.getInstance().getHaskellFiles()) {
@@ -167,7 +166,7 @@ public class Size {
   /**
    * Calculate all size metrics and store them as static variables.
    *
-   * @throws FileNotFoundException when a file in the FileList resource cannot be found.
+   * @throws IOException when a file in the FileList resource cannot be found.
    */
   private static void calculateMetrics() throws IOException {
     initializeMetrics();

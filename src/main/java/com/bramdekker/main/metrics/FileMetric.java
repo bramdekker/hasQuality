@@ -14,14 +14,14 @@ public class FileMetric {
   /**
    * Set all metrics for the file.
    *
-   * @param name name of the file as String
-   * @param bytes number of bytes of the file
-   * @param chars number of characters in the file
-   * @param cloc number of comment lines in the file
-   * @param ncloc number of non-comment lines in the file
-   * @param blankLines number of blanklines in the file
-   * @param es number of executable statements in the file
-   * @param dsi number of deliverd source instruction in the file
+   * @param name name of the file as String.
+   * @param bytes number of bytes of the file.
+   * @param chars number of characters in the file.
+   * @param cloc number of comment lines in the file.
+   * @param ncloc number of non-comment lines in the file.
+   * @param blankLines number of blanklines in the file.
+   * @param es number of executable statements in the file.
+   * @param dsi number of delivered source instruction in the file.
    */
   public FileMetric(
       String name,

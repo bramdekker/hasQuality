@@ -2,13 +2,16 @@ package com.bramdekker.main.resources;
 
 import antlr.HaskellLexer;
 import antlr.HaskellParser;
+import org.antlr.v4.gui.TreeViewer;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 
+import javax.swing.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
@@ -74,19 +77,20 @@ public class HaskellParseTree {
           new HaskellLexer(CharStreams.fromString(parseTree.getFileContents(file)));
       HaskellParser parser = new HaskellParser(new CommonTokenStream(lexer));
 
-      parseTree.treeDict.put(file.getCanonicalPath(), parser.module());
-    }
+      ParseTree tree = parser.module();
+      parseTree.treeDict.put(file.getCanonicalPath(), tree);
 
-    //    JFrame frame = new JFrame("Antlr parse tree");
-    //    JPanel panel = new JPanel();
-    //    TreeViewer viewer = new TreeViewer(Arrays.asList(
-    //            parser.getRuleNames()), parseTree.tree);
-    //    viewer.setScale(1.5); // Scale a little
-    //    panel.add(viewer);
-    //    frame.add(panel);
-    //    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    //    frame.pack();
-    //    frame.setVisible(true);
+      //      JFrame frame = new JFrame("Antlr parse tree");
+      //      JPanel panel = new JPanel();
+      //      TreeViewer viewer = new TreeViewer(Arrays.asList(
+      //              parser.getRuleNames()), tree);
+      //      viewer.setScale(1.0); // Scale a little
+      //      panel.add(viewer);
+      //      frame.add(panel);
+      //      frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+      //      frame.pack();
+      //      frame.setVisible(true);
+    }
 
     return parseTree;
   }
