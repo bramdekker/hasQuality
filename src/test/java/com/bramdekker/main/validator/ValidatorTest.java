@@ -36,14 +36,14 @@ class ValidatorTest {
   @Test
   void validateSucceedsWhenHaskellFileGiven()
       throws InvalidPathnameException, InvalidCommandException {
-    String dir = pathToTestResources + "/haskell-project/individual.hs";
+    String dir = pathToTestResources + "/haskell-project/Individual.hs";
     assertTrue(new Validator().validate(new String[] {dir}));
   }
 
   @Test
   void validateSucceedsWhenValidFlagsAndHaskellFileGiven()
       throws InvalidPathnameException, InvalidCommandException {
-    String dir = pathToTestResources + "/haskell-project/individual.hs";
+    String dir = pathToTestResources + "/haskell-project/Individual.hs";
     assertTrue(new Validator().validate(new String[] {"-s", "-r", dir}));
   }
 

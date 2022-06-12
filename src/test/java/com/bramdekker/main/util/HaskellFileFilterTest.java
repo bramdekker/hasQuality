@@ -22,7 +22,7 @@ class HaskellFileFilterTest {
   @Test
   void acceptTrueOnHaskellFile() {
     File haskellFile = new File(pathToTestResources + "/haskell-project");
-    assertTrue(new HaskellFileFilter().accept(haskellFile, "individual.hs"));
+    assertTrue(new HaskellFileFilter().accept(haskellFile, "Individual.hs"));
   }
 
   @Test

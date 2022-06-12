@@ -6,15 +6,14 @@ import org.antlr.v4.gui.TreeViewer;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.TerminalNode;
+import org.antlr.v4.runtime.tree.xpath.XPath;
 
 import javax.swing.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 
 /**
  * A singleton class that contains functionality to generate, get and set a parse tree representing
@@ -23,6 +22,9 @@ import java.util.Scanner;
 public class HaskellParseTree {
   private static HaskellParseTree instance;
   private Map<String, ParseTree> treeDict;
+  private Map<String, ParseTree> patternDict;
+  private List<ParseTree> letInList;
+  private List<ParseTree> whereList;
 
   /** Private constructor to make it singleton. */
   private HaskellParseTree() {}
@@ -71,6 +73,9 @@ public class HaskellParseTree {
   private static HaskellParseTree generateInstance() throws IOException {
     HaskellParseTree parseTree = new HaskellParseTree();
     parseTree.treeDict = new HashMap<>();
+    parseTree.patternDict = new HashMap<>();
+    parseTree.letInList = new ArrayList<>();
+    parseTree.whereList = new ArrayList<>();
 
     for (File file : FileList.getInstance().getHaskellFiles()) {
       HaskellLexer lexer =
@@ -80,10 +85,22 @@ public class HaskellParseTree {
       ParseTree tree = parser.module();
       parseTree.treeDict.put(file.getCanonicalPath(), tree);
 
+      for (ParseTree t : XPath.findAll(tree, "//topdecls/topdecl/decl_no_th/infixexp", parser)) {
+        String moduleName = getModuleName(t);
+        TerminalNode function = (TerminalNode) getLeftMostChild(t);
+        String patternName =
+            String.format(
+                "%s.%s (line %d)", moduleName, function.getText(), function.getSymbol().getLine());
+        parseTree.patternDict.put(patternName, t);
+      }
+
+      parseTree.letInList.addAll(XPath.findAll(tree, "//aexp/decllist/decls/decl", parser));
+      parseTree.whereList.addAll(
+          XPath.findAll(tree, "//wherebinds/binds/decllist/decls/decl", parser));
+
       //      JFrame frame = new JFrame("Antlr parse tree");
       //      JPanel panel = new JPanel();
-      //      TreeViewer viewer = new TreeViewer(Arrays.asList(
-      //              parser.getRuleNames()), tree);
+      //      TreeViewer viewer = new TreeViewer(Arrays.asList(parser.getRuleNames()), tree);
       //      viewer.setScale(1.0); // Scale a little
       //      panel.add(viewer);
       //      frame.add(panel);
@@ -95,12 +112,65 @@ public class HaskellParseTree {
     return parseTree;
   }
 
+  private static String getModuleName(ParseTree tree) {
+    ParseTree moduleContentNode = tree;
+    while (moduleContentNode != null) {
+      if (moduleContentNode instanceof HaskellParser.Module_contentContext) {
+        break;
+      }
+      moduleContentNode = moduleContentNode.getParent();
+    }
+
+    return getLeftMostChild(moduleContentNode.getChild(1)).getText();
+  }
+
   /**
-   * Getter for the tree field.
+   * Get the left most child from node using depth-first search.
    *
-   * @return an antlr ParseTree of the whole project.
+   * @param node the start node.
+   * @return the left most child of the node.
+   */
+  private static ParseTree getLeftMostChild(ParseTree node) {
+    if (node.getChildCount() > 0) {
+      return getLeftMostChild(node.getChild(0));
+    }
+
+    return node;
+  }
+
+  /**
+   * Getter for the treeDict field.
+   *
+   * @return a dictionary with ParseTree per module.
    */
   public Map<String, ParseTree> getTreeDict() {
     return this.treeDict;
+  }
+
+  /**
+   * Getter for the patternTree field.
+   *
+   * @return a dictionary with all patterns ParseTree in all modules.
+   */
+  public Map<String, ParseTree> getPatternDict() {
+    return this.patternDict;
+  }
+
+  /**
+   * Getter for the letInList field.
+   *
+   * @return a List with all let-in expressions in all modules.
+   */
+  public List<ParseTree> getLetInList() {
+    return this.letInList;
+  }
+
+  /**
+   * Getter for the whereList field.
+   *
+   * @return a List with all where clauses in all modules.
+   */
+  public List<ParseTree> getWhereList() {
+    return this.whereList;
   }
 }

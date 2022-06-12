@@ -27,7 +27,7 @@ class SubdirectoryFilterTest {
 
   @Test
   void acceptFalseOnFile() {
-    File dir = new File(pathToTestResources + "/haskell-project/individual.hs");
-    assertFalse(new SubdirectoryFilter().accept(dir, "individual.hs"));
+    File dir = new File(pathToTestResources + "/haskell-project/Individual.hs");
+    assertFalse(new SubdirectoryFilter().accept(dir, "Individual.hs"));
   }
 }

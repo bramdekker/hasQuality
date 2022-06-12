@@ -1,6 +1,6 @@
 package com.bramdekker.main.metrics;
 
-/** Encapsulates data for a specific file. */
+/** Encapsulates size data for a specific file. */
 public class SizeFileMetric {
   public String name;
   public long bytes;

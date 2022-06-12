@@ -6,7 +6,7 @@
 -- This program defines different existing Haskell functions in terms of other
 -- functions like foldr, foldl and scanl.
 
-module Puzzles
+module Individual
 
 where
 

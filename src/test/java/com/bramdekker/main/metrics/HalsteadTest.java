@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 // Halstead volume:
 // avgHalsteadLength: 249
 // maxHalsteadLength: 292
-// maxHalsteadLengthName: individual.hs
+// maxHalsteadLengthName: Individual.hs
 // avgHalsteadVocabulary:
 // maxHalsteadVocabulary:
 // maxHalsteadVocabularyName:
@@ -53,6 +53,6 @@ class HalsteadTest {
 
   @Test
   void maxModuleSizeNameIsCorrect() {
-    assertTrue(halsteadSection.matches("(?s).*Maximum Halstead length file:.*/individual.hs.*$"));
+    assertTrue(halsteadSection.matches("(?s).*Maximum Halstead length file:.*/Individual.hs.*$"));
   }
 }

@@ -126,10 +126,10 @@ public class Readability {
       totalSentences += metric.sentences;
       totalComplexWords += metric.complexWords;
 
-      long fogIndex = calculateFogIndex(metric.words, metric.sentences, metric.complexWords);
-      totalSumFogIndex += fogIndex;
-      if (fogIndex > curMaxFogIndex) {
-        curMaxFogIndex = fogIndex;
+      long curFogIndex = calculateFogIndex(metric.words, metric.sentences, metric.complexWords);
+      totalSumFogIndex += curFogIndex;
+      if (curFogIndex > curMaxFogIndex) {
+        curMaxFogIndex = curFogIndex;
         curMaxFogIndexName = metric.name;
       }
     }
@@ -149,8 +149,11 @@ public class Readability {
    * @return the Gunning's fog index.
    */
   private static long calculateFogIndex(long words, long sentences, long complexWords) {
-    double wordSentencesRatio = (double) words / sentences;
-    double complexWordsPercentage = 100 * (double) complexWords / words;
+    long sanitizedSentences = sentences > 0 ? sentences : 1;
+    long sanitizedWords = words > 0 ? words : 1;
+
+    double wordSentencesRatio = (double) words / sanitizedSentences;
+    double complexWordsPercentage = 100 * (double) complexWords / sanitizedWords;
     return Math.round(0.4 * (wordSentencesRatio + complexWordsPercentage));
   }
 

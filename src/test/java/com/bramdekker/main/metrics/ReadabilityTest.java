@@ -51,7 +51,7 @@ class ReadabilityTest {
   @Test
   void minCommentDensityNameIsCorrect() {
     assertTrue(
-        readabilitySection.matches("(?s).*Minimum comment density file: .*/individual.hs.*$"));
+        readabilitySection.matches("(?s).*Minimum comment density file: .*/Individual.hs.*$"));
   }
 
   @Test

@@ -18,11 +18,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 // 30 = max module size
 // 31 + 27 = 58 comment lines
 // 53 code lines
-// Size in bytes: 2.683 + 2.146= 4829 bytes
-// Size in characters: 4829 characters
+// Size in bytes: 2.686 + 2.146= 4832 bytes
+// Size in characters: 4832 characters
 // Executable statements: 27 + 21 = 48
 // Delivered Source instructions: 53
-// Biggest module: individual.hs
+// Biggest module: Individual.hs
 class SizeTest {
   static String pathToTestResources;
   static String sizeSection;
@@ -68,12 +68,12 @@ class SizeTest {
 
   @Test
   void sizeInBytesMeasureIsCorrect() {
-    assertTrue(sizeSection.contains("Size in bytes: 4829"));
+    assertTrue(sizeSection.contains("Size in bytes: 4832"));
   }
 
   @Test
   void sizeInCharactersMeasureIsCorrect() {
-    assertTrue(sizeSection.contains("Size in characters: 4829"));
+    assertTrue(sizeSection.contains("Size in characters: 4832"));
   }
 
   @Test
@@ -88,6 +88,6 @@ class SizeTest {
 
   @Test
   void maxModuleSizeNameIsCorrect() {
-    assertTrue(sizeSection.matches("(?s).*Maximum module size file: .*/individual.hs.*$"));
+    assertTrue(sizeSection.matches("(?s).*Maximum module size file: .*/Individual.hs.*$"));
   }
 }
