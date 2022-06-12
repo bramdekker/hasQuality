@@ -58,7 +58,6 @@ public class Patterns {
     return patternSection.toString();
   }
 
-  // TODO: refactor duplicated lines!!!
   private static void collectFileData() throws IOException {
     for (Map.Entry<String, ParseTree> entry :
         HaskellParseTree.getInstance().getPatternDict().entrySet()) {
@@ -123,92 +122,64 @@ public class Patterns {
     }
 
     for (ParseTree letPattern : HaskellParseTree.getInstance().getLetInList()) {
-      LeafVisitor leafVisitor = new LeafVisitor();
-      List<TerminalNode> leaves = leafVisitor.visit(letPattern);
-
-      long numberOfVariables = 0;
-      long numberOfConstructors = 0;
-      long numberOfWildcards = 0;
-      long curDepth = 0;
-      long depthOfNesting = 0;
-      long depthSumOfNesting = 0;
-
-      for (TerminalNode leaf : leaves) {
-        String leafText = leaf.getSymbol().getText();
-        if (leafText.equals("_")) {
-          numberOfWildcards++;
-        } else if (Character.isUpperCase(leafText.charAt(0))) {
-          numberOfConstructors++;
-        } else if (leafText.equals("[") || leafText.equals("(")) {
-          depthSumOfNesting++;
-          curDepth++;
-          if (curDepth > depthOfNesting) {
-            depthOfNesting = curDepth;
-          }
-        } else if (leafText.equals("]") || leafText.equals(")")) {
-          curDepth--;
-        } else if (Character.isLowerCase(leafText.charAt(0))) {
-          numberOfVariables++;
-        }
-      }
-
-      TerminalNode startToken = (TerminalNode) getLeftMostChild(letPattern);
-
-      dataPerPattern.add(
-          new PatternMetric(
-              String.format("let (line %d)", startToken.getSymbol().getLine()),
-              numberOfVariables,
-              numberOfConstructors,
-              numberOfWildcards,
-              depthSumOfNesting,
-              depthOfNesting,
-              getTreeSize(letPattern)));
+      analyzePatternNode(letPattern, "let (line %d)");
     }
 
-    for (ParseTree letPattern : HaskellParseTree.getInstance().getWhereList()) {
-      LeafVisitor leafVisitor = new LeafVisitor();
-      List<TerminalNode> leaves = leafVisitor.visit(letPattern);
-
-      long numberOfVariables = 0;
-      long numberOfConstructors = 0;
-      long numberOfWildcards = 0;
-      long curDepth = 0;
-      long depthOfNesting = 0;
-      long depthSumOfNesting = 0;
-
-      for (TerminalNode leaf : leaves) {
-        String leafText = leaf.getSymbol().getText();
-        if (leafText.equals("_")) {
-          numberOfWildcards++;
-        } else if (Character.isUpperCase(leafText.charAt(0))) {
-          numberOfConstructors++;
-        } else if (leafText.equals("[") || leafText.equals("(")) {
-          depthSumOfNesting++;
-          curDepth++;
-          if (curDepth > depthOfNesting) {
-            depthOfNesting = curDepth;
-          }
-        } else if (leafText.equals("]") || leafText.equals(")")) {
-          curDepth--;
-        } else if (Character.isLowerCase(leafText.charAt(0))) {
-          numberOfVariables++;
-        }
-      }
-
-      TerminalNode startToken = (TerminalNode) getLeftMostChild(letPattern);
-
-      dataPerPattern.add(
-          new PatternMetric(
-              String.format("where (line %d)", startToken.getSymbol().getLine()),
-              numberOfVariables,
-              numberOfConstructors,
-              numberOfWildcards,
-              depthSumOfNesting,
-              depthOfNesting,
-              getTreeSize(letPattern)));
+    for (ParseTree whereClause : HaskellParseTree.getInstance().getWhereList()) {
+      analyzePatternNode(whereClause, "where (line %d)");
     }
   }
 
+  /**
+   * Analyze a node representing a pattern.
+   *
+   * @param node the node.
+   * @param format the name format.
+   */
+  private static void analyzePatternNode(ParseTree node, String format) {
+    LeafVisitor leafVisitor = new LeafVisitor();
+    List<TerminalNode> leaves = leafVisitor.visit(node);
+
+    long numberOfVariables = 0;
+    long numberOfConstructors = 0;
+    long numberOfWildcards = 0;
+    long curDepth = 0;
+    long depthOfNesting = 0;
+    long depthSumOfNesting = 0;
+
+    for (TerminalNode leaf : leaves) {
+      String leafText = leaf.getSymbol().getText();
+      if (leafText.equals("_")) {
+        numberOfWildcards++;
+      } else if (Character.isUpperCase(leafText.charAt(0))) {
+        numberOfConstructors++;
+      } else if (leafText.equals("[") || leafText.equals("(")) {
+        depthSumOfNesting++;
+        curDepth++;
+        if (curDepth > depthOfNesting) {
+          depthOfNesting = curDepth;
+        }
+      } else if (leafText.equals("]") || leafText.equals(")")) {
+        curDepth--;
+      } else if (Character.isLowerCase(leafText.charAt(0))) {
+        numberOfVariables++;
+      }
+    }
+
+    TerminalNode startToken = (TerminalNode) getLeftMostChild(node);
+
+    dataPerPattern.add(
+        new PatternMetric(
+            String.format(format, startToken.getSymbol().getLine()),
+            numberOfVariables,
+            numberOfConstructors,
+            numberOfWildcards,
+            depthSumOfNesting,
+            depthOfNesting,
+            getTreeSize(node)));
+  }
+
+  /** Calculate all pattern metrics and store them as static variables. */
   private static void calculateMetrics() {
     for (PatternMetric metric : dataPerPattern) {
       avgNumberOfVariables += metric.numberOfVariables;
