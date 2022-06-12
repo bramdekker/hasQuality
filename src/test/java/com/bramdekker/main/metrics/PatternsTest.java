@@ -68,7 +68,7 @@ class PatternsTest {
     @Test
     void maxSumDepthOfNestingNameIsCorrect() {
         assertTrue(patternsSection.matches(
-                "(?s).*Maximum sum of depth of nesting: Puzzles.isPalindrome.*$"
+                "(?s).*Maximum sum of depth of nesting function name: Puzzles.isPalindrome.*$"
         ));
     }
 }
