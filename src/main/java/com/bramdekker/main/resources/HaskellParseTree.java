@@ -98,15 +98,15 @@ public class HaskellParseTree {
       parseTree.whereList.addAll(
           XPath.findAll(tree, "//wherebinds/binds/decllist/decls/decl", parser));
 
-      JFrame frame = new JFrame("Antlr parse tree");
-      JPanel panel = new JPanel();
-      TreeViewer viewer = new TreeViewer(Arrays.asList(parser.getRuleNames()), tree);
-      viewer.setScale(1.0); // Scale a little
-      panel.add(viewer);
-      frame.add(panel);
-      frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-      frame.pack();
-      frame.setVisible(true);
+//      JFrame frame = new JFrame("Antlr parse tree");
+//      JPanel panel = new JPanel();
+//      TreeViewer viewer = new TreeViewer(Arrays.asList(parser.getRuleNames()), tree);
+//      viewer.setScale(1.0); // Scale a little
+//      panel.add(viewer);
+//      frame.add(panel);
+//      frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//      frame.pack();
+//      frame.setVisible(true);
     }
 
     return parseTree;
