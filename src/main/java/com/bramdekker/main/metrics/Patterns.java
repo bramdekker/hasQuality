@@ -2,9 +2,6 @@ package com.bramdekker.main.metrics;
 
 import com.bramdekker.main.resources.HaskellParseTree;
 import com.bramdekker.main.util.LeafVisitor;
-import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.RuleContext;
-import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
@@ -15,7 +12,7 @@ import static com.bramdekker.main.util.MetricPrinter.getMetricString;
 
 /** Collection of methods that determine pattern metrics. */
 public class Patterns {
-  private static List<PatternMetric> dataPerPattern = new ArrayList<>();
+  private static final List<PatternMetric> dataPerPattern = new ArrayList<>();
   private static double avgNumberOfVariables = 0;
   private static double avgNumberOfConstructors = 0;
   private static double avgNumberOfWildcards = 0;
@@ -29,6 +26,12 @@ public class Patterns {
   private static long maxPatternSize = 0;
   private static String maxPatternSizeName = "";
 
+  /**
+   * Get the section on pattern metrics.
+   *
+   * @return a String containing the section with pattern metrics.
+   * @throws IOException when a file in the FileList resource cannot be found.
+   */
   public static String getSection() throws IOException {
     collectFileData();
     calculateMetrics();
@@ -36,25 +39,32 @@ public class Patterns {
     StringBuilder patternSection = new StringBuilder("Pattern metrics:\n");
 
     patternSection.append(getMetricString("Average number of variables", avgNumberOfVariables));
-    patternSection.append(getMetricString("Average number of constructors", avgNumberOfConstructors));
+    patternSection.append(
+        getMetricString("Average number of constructors", avgNumberOfConstructors));
     patternSection.append(getMetricString("Average number of wildcards", avgNumberOfWildcards));
     patternSection.append(getMetricString("Average depth of nesting", avgDepthOfNesting));
     patternSection.append(getMetricString("Maximum depth of nesting", maxDepthOfNesting));
-    patternSection.append(getMetricString("Maximum depth of nesting function name", maxDepthOfNestingName));
+    patternSection.append(
+        getMetricString("Maximum depth of nesting function name", maxDepthOfNestingName));
     patternSection.append(getMetricString("Average sum of depth of nesting", avgSumDepthOfNesting));
     patternSection.append(getMetricString("Maximum sum of depth of nesting", maxSumDepthOfNesting));
-    patternSection.append(getMetricString("Maximum sum of depth of nesting function name", maxSumDepthOfNestingName));
+    patternSection.append(
+        getMetricString("Maximum sum of depth of nesting function name", maxSumDepthOfNestingName));
     patternSection.append(getMetricString("Average pattern size (nodes)", avgPatternSize));
     patternSection.append(getMetricString("Maximum pattern size", maxPatternSize));
-    patternSection.append(getMetricString("Maximum pattern size function name", maxPatternSizeName));
+    patternSection.append(
+        getMetricString("Maximum pattern size function name", maxPatternSizeName));
 
     return patternSection.toString();
   }
 
-  // TODO: first write tests for the pattern metrics! Then refactor.
   // TODO: refactor duplicated lines!!!
   private static void collectFileData() throws IOException {
-    for (Map.Entry<String, ParseTree> entry : HaskellParseTree.getInstance().getPatternDict().entrySet()) {
+    for (Map.Entry<String, ParseTree> entry :
+        HaskellParseTree.getInstance().getPatternDict().entrySet()) {
+      boolean inGuard = true;
+      boolean lastTokenWasEquals = false;
+      boolean lastTokenWasPipe = false;
       LeafVisitor leafVisitor = new LeafVisitor();
       List<TerminalNode> leaves = leafVisitor.visit(entry.getValue());
       leaves.remove(0);
@@ -68,6 +78,22 @@ public class Patterns {
 
       for (TerminalNode leaf : leaves) {
         String leafText = leaf.getSymbol().getText();
+        if (lastTokenWasEquals && !leafText.equals("=")) {
+          inGuard = false;
+          lastTokenWasEquals = false;
+        } else if (lastTokenWasPipe && !leafText.equals("|")) {
+          inGuard = true;
+          lastTokenWasPipe = false;
+        } else if (leafText.equals("|")) {
+          lastTokenWasPipe = !lastTokenWasPipe;
+        } else if (leafText.equals("=")) {
+          lastTokenWasEquals = !lastTokenWasEquals;
+        }
+
+        if (!inGuard) {
+          continue;
+        }
+
         if (leafText.equals("_")) {
           numberOfWildcards++;
         } else if (Character.isUpperCase(leafText.charAt(0))) {
@@ -85,15 +111,15 @@ public class Patterns {
         }
       }
 
-      dataPerPattern.add(new PatternMetric(
+      dataPerPattern.add(
+          new PatternMetric(
               entry.getKey(),
               numberOfVariables,
               numberOfConstructors,
               numberOfWildcards,
               depthSumOfNesting,
               depthOfNesting,
-              getTreeSize(entry.getValue())
-      ));
+              getTreeSize(entry.getValue())));
     }
 
     for (ParseTree letPattern : HaskellParseTree.getInstance().getLetInList()) {
@@ -128,15 +154,15 @@ public class Patterns {
 
       TerminalNode startToken = (TerminalNode) getLeftMostChild(letPattern);
 
-      dataPerPattern.add(new PatternMetric(
+      dataPerPattern.add(
+          new PatternMetric(
               String.format("let (line %d)", startToken.getSymbol().getLine()),
               numberOfVariables,
               numberOfConstructors,
               numberOfWildcards,
               depthSumOfNesting,
               depthOfNesting,
-              getTreeSize(letPattern)
-      ));
+              getTreeSize(letPattern)));
     }
 
     for (ParseTree letPattern : HaskellParseTree.getInstance().getWhereList()) {
@@ -171,15 +197,15 @@ public class Patterns {
 
       TerminalNode startToken = (TerminalNode) getLeftMostChild(letPattern);
 
-      dataPerPattern.add(new PatternMetric(
+      dataPerPattern.add(
+          new PatternMetric(
               String.format("where (line %d)", startToken.getSymbol().getLine()),
               numberOfVariables,
               numberOfConstructors,
               numberOfWildcards,
               depthSumOfNesting,
               depthOfNesting,
-              getTreeSize(letPattern)
-      ));
+              getTreeSize(letPattern)));
     }
   }
 
@@ -200,31 +226,34 @@ public class Patterns {
     avgDepthOfNesting /= dataPerPattern.size();
     avgPatternSize /= dataPerPattern.size();
 
-    Optional<PatternMetric> maxSumDepth = dataPerPattern
-            .stream()
-            .max(Comparator.comparingLong(a -> a.depthSumOfNesting));
+    Optional<PatternMetric> maxSumDepth =
+        dataPerPattern.stream().max(Comparator.comparingLong(a -> a.depthSumOfNesting));
     if (maxSumDepth.isPresent()) {
       maxSumDepthOfNesting = maxSumDepth.get().depthSumOfNesting;
       maxSumDepthOfNestingName = maxSumDepth.get().name;
     }
 
-    Optional<PatternMetric> maxDepth = dataPerPattern
-            .stream()
-            .max(Comparator.comparingLong(a -> a.depthOfNesting));
+    Optional<PatternMetric> maxDepth =
+        dataPerPattern.stream().max(Comparator.comparingLong(a -> a.depthOfNesting));
     if (maxDepth.isPresent()) {
       maxDepthOfNesting = maxDepth.get().depthOfNesting;
       maxDepthOfNestingName = maxDepth.get().name;
     }
 
-    Optional<PatternMetric> maxSize = dataPerPattern
-            .stream()
-            .max(Comparator.comparingLong(a -> a.patternSize));
+    Optional<PatternMetric> maxSize =
+        dataPerPattern.stream().max(Comparator.comparingLong(a -> a.patternSize));
     if (maxSize.isPresent()) {
       maxPatternSize = maxSize.get().patternSize;
       maxPatternSizeName = maxSize.get().name;
     }
   }
 
+  /**
+   * Get the size of the tree in number of nodes.
+   *
+   * @param tree the tree to be analyzed.
+   * @return long representing the number of nodes in the tree.
+   */
   private static long getTreeSize(ParseTree tree) {
     long nodes = 1;
 

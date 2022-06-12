@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 // Size in characters: 4829 characters
 // Executable statements: 27 + 21 = 48
 // Delivered Source instructions: 53
-// Biggest module: individual.hs
+// Biggest module: Individual.hs
 class SizeTest {
   static String pathToTestResources;
   static String sizeSection;

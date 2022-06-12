@@ -6,6 +6,7 @@ import org.antlr.v4.gui.TreeViewer;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.TerminalNode;
 import org.antlr.v4.runtime.tree.xpath.XPath;
 
 import javax.swing.*;
@@ -85,26 +86,42 @@ public class HaskellParseTree {
       parseTree.treeDict.put(file.getCanonicalPath(), tree);
 
       for (ParseTree t : XPath.findAll(tree, "//topdecls/topdecl/decl_no_th/infixexp", parser)) {
-        ParseTree function = getLeftMostChild(t);
-        parseTree.patternDict.put(function.getText(), t);
+        String moduleName = getModuleName(t);
+        TerminalNode function = (TerminalNode) getLeftMostChild(t);
+        String patternName =
+            String.format(
+                "%s.%s (line %d)", moduleName, function.getText(), function.getSymbol().getLine());
+        parseTree.patternDict.put(patternName, t);
       }
 
       parseTree.letInList.addAll(XPath.findAll(tree, "//aexp/decllist/decls/decl", parser));
-      parseTree.whereList.addAll(XPath.findAll(tree, "//wherebinds/binds/decllist/decls/decl", parser));
+      parseTree.whereList.addAll(
+          XPath.findAll(tree, "//wherebinds/binds/decllist/decls/decl", parser));
 
-            JFrame frame = new JFrame("Antlr parse tree");
-            JPanel panel = new JPanel();
-            TreeViewer viewer = new TreeViewer(Arrays.asList(
-                    parser.getRuleNames()), tree);
-            viewer.setScale(1.0); // Scale a little
-            panel.add(viewer);
-            frame.add(panel);
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.pack();
-            frame.setVisible(true);
+      JFrame frame = new JFrame("Antlr parse tree");
+      JPanel panel = new JPanel();
+      TreeViewer viewer = new TreeViewer(Arrays.asList(parser.getRuleNames()), tree);
+      viewer.setScale(1.0); // Scale a little
+      panel.add(viewer);
+      frame.add(panel);
+      frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+      frame.pack();
+      frame.setVisible(true);
     }
 
     return parseTree;
+  }
+
+  private static String getModuleName(ParseTree tree) {
+    ParseTree moduleContentNode = tree;
+    while (moduleContentNode != null) {
+      if (moduleContentNode instanceof HaskellParser.Module_contentContext) {
+        break;
+      }
+      moduleContentNode = moduleContentNode.getParent();
+    }
+
+    return getLeftMostChild(moduleContentNode.getChild(1)).getText();
   }
 
   /**
@@ -130,7 +147,6 @@ public class HaskellParseTree {
     return this.treeDict;
   }
 
-
   /**
    * Getter for the patternTree field.
    *
@@ -139,7 +155,6 @@ public class HaskellParseTree {
   public Map<String, ParseTree> getPatternDict() {
     return this.patternDict;
   }
-
 
   /**
    * Getter for the letInList field.

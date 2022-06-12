@@ -26,7 +26,7 @@ class FileListTest {
 
     List<File> expectedFiles =
         List.of(
-            new File(pathToTestResources + "/haskell-project/individual.hs"),
+            new File(pathToTestResources + "/haskell-project/Individual.hs"),
             new File(pathToTestResources + "/haskell-project/Puzzles.hs"));
     List<File> otherFiles =
         List.of(
