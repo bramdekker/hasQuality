@@ -70,11 +70,12 @@ public class Validator {
                 USAGE: ./gradle run [flags] <path-to-haskell-project-dir>
                 
                 Flags:
-                    -s              Compute and report on size metrics.
+                    -sz             Compute and report on size metrics.
                     -rc             Compute and report on recursion metrics.
                     -p              Compute and report on pattern metrics.
                     -rd             Compute and report on readability metrics.
                     -h              Compute and report on Halstead metrics.
+                    -st             Compute and report on structural metrics.
                     --help          Show this help message.
                 """;
     System.out.println(helpMessage.trim());
