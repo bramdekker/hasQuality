@@ -18,8 +18,8 @@ public class HalsteadVisitor extends HaskellParserBaseVisitor<Void> {
   private static String currentFunction;
   private static String lastOperator = "";
   private static final List<String> functions = new ArrayList<>();
-  private static final List<String> datas = new ArrayList<>();
-  private static final List<String> types = new ArrayList<>();
+  private static final List<String> dataTypes = new ArrayList<>();
+  private static final List<String> typeSynonyms = new ArrayList<>();
   private static final List<String> ignoredTokens =
       List.of("}", "]", ")", ",", "<EOF>", "SEMI", "VOCURLY", "VCCURLY");
 
@@ -48,9 +48,9 @@ public class HalsteadVisitor extends HaskellParserBaseVisitor<Void> {
   @Override
   public Void visitTy_decl(HaskellParser.Ty_declContext ctx) {
     if (ctx.getChild(0).getText().equals("type")) {
-      types.add(getLeftMostChild(ctx.getChild(1)).getText());
+      typeSynonyms.add(getLeftMostChild(ctx.getChild(1)).getText());
     } else if (ctx.getChild(0).getText().equals("data")) {
-      datas.add(getLeftMostChild(ctx.getChild(1)).getText());
+      dataTypes.add(getLeftMostChild(ctx.getChild(1)).getText());
     }
 
     return super.visitTy_decl(ctx);
@@ -328,6 +328,24 @@ public class HalsteadVisitor extends HaskellParserBaseVisitor<Void> {
    */
   public static List<String> getFunctions() {
     return functions;
+  }
+
+  /**
+   * Getter for the data types field.
+   *
+   * @return List of Strings with all data types defined in the parse tree.
+   */
+  public static List<String> getDataTypes() {
+    return dataTypes;
+  }
+
+  /**
+   * Getter for the type synonyms field.
+   *
+   * @return List of Strings with all type synonyms defined in the parse tree.
+   */
+  public static List<String> getTypeSynonyms() {
+    return typeSynonyms;
   }
 
   /**
