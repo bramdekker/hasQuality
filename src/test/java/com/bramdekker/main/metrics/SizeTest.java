@@ -10,7 +10,7 @@ import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-// test-project
+// haskell-project
 // 62 + 76 = 138 lines in total
 // 12 + 15 = 27 blank lines
 // 111 = LOC
