@@ -109,9 +109,9 @@ public class Structural {
       dataPerFile.add(
           new StructuralFileMetric(
               entry.getKey(),
-              HalsteadVisitor.getFunctions().size(),
-              HalsteadVisitor.getTypeSynonyms().size(),
-              HalsteadVisitor.getDataTypes().size()));
+              visitor.getFunctions().size(),
+              visitor.getTypeSynonyms().size(),
+              visitor.getDataTypes().size()));
     }
   }
 

@@ -32,7 +32,7 @@ class ConfigurationTest {
   @Test
   void getDirectoryReturnsLastCommandLineArgumentMultipleFlags() throws InvalidCommandException {
     String dirName = "/just/some/test/directory";
-    String[] args = new String[] {"-s", "-rc", dirName};
+    String[] args = new String[] {"-sz", "-rc", dirName};
 
     assertEquals(dirName, new Configuration(args).getPathname());
   }

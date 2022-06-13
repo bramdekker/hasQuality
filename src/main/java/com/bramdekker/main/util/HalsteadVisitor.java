@@ -17,9 +17,9 @@ public class HalsteadVisitor extends HaskellParserBaseVisitor<Void> {
   private static final LeafVisitor leafVisitor = new LeafVisitor();
   private static String currentFunction;
   private static String lastOperator = "";
-  private static final List<String> functions = new ArrayList<>();
-  private static final List<String> dataTypes = new ArrayList<>();
-  private static final List<String> typeSynonyms = new ArrayList<>();
+  private final List<String> functions = new ArrayList<>();
+  private final List<String> dataTypes = new ArrayList<>();
+  private final List<String> typeSynonyms = new ArrayList<>();
   private static final List<String> ignoredTokens =
       List.of("}", "]", ")", ",", "<EOF>", "SEMI", "VOCURLY", "VCCURLY");
 
@@ -48,9 +48,9 @@ public class HalsteadVisitor extends HaskellParserBaseVisitor<Void> {
   @Override
   public Void visitTy_decl(HaskellParser.Ty_declContext ctx) {
     if (ctx.getChild(0).getText().equals("type")) {
-      typeSynonyms.add(getLeftMostChild(ctx.getChild(1)).getText());
+      this.typeSynonyms.add(getLeftMostChild(ctx.getChild(1)).getText());
     } else if (ctx.getChild(0).getText().equals("data")) {
-      dataTypes.add(getLeftMostChild(ctx.getChild(1)).getText());
+      this.dataTypes.add(getLeftMostChild(ctx.getChild(1)).getText());
     }
 
     return super.visitTy_decl(ctx);
@@ -70,8 +70,8 @@ public class HalsteadVisitor extends HaskellParserBaseVisitor<Void> {
       if (ctx.getParent() instanceof HaskellParser.TopdeclContext) {
         TerminalNode functionName = leaves.remove(0);
         currentFunction = functionName.getText();
-        if (!functions.contains(functionName.getText())) {
-          functions.add(functionName.getText());
+        if (!this.functions.contains(functionName.getText())) {
+          this.functions.add(functionName.getText());
         }
       }
 
@@ -326,8 +326,8 @@ public class HalsteadVisitor extends HaskellParserBaseVisitor<Void> {
    *
    * @return List of Strings with all function defined in the parse tree.
    */
-  public static List<String> getFunctions() {
-    return functions;
+  public List<String> getFunctions() {
+    return this.functions;
   }
 
   /**
@@ -335,8 +335,8 @@ public class HalsteadVisitor extends HaskellParserBaseVisitor<Void> {
    *
    * @return List of Strings with all data types defined in the parse tree.
    */
-  public static List<String> getDataTypes() {
-    return dataTypes;
+  public List<String> getDataTypes() {
+    return this.dataTypes;
   }
 
   /**
@@ -344,8 +344,8 @@ public class HalsteadVisitor extends HaskellParserBaseVisitor<Void> {
    *
    * @return List of Strings with all type synonyms defined in the parse tree.
    */
-  public static List<String> getTypeSynonyms() {
-    return typeSynonyms;
+  public List<String> getTypeSynonyms() {
+    return this.typeSynonyms;
   }
 
   /**
