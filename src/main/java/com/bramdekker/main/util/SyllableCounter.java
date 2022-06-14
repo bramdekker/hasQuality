@@ -3,7 +3,27 @@ package com.bramdekker.main.util;
 import java.util.List;
 
 /**
- * Class that exposes a static method to determine the number of syllables in an English word.
+ * Class that exposes a static method to determine the number of syllables in an English word. It
+ * is based on this theory (so not completely precise!):
+ *    Starting y omitted:
+ *      (a) when words begin with y, we don’t count the starting y as a vowel. (we are
+ *      assuming there are no words that start with y followed immediately by a consonant)
+ *    Silent e omitted:
+ *      (a) when e is the last letter of a word, we’ll assume it is silent, unless the word is café
+ *      or entrée (words borrowed from French). (* we’ll ignore all other words to simplify)
+ *      For simplification, it may be best to create a new String without this silent e, before
+ *      checking for more syllables.
+ *    With the silent-e omitted, one-syllable units:
+ *      (a) have a single vowel.
+ *      (b) have two vowels that are the same letter in succession.
+ *      (c) have two vowels in immediate succession that are ei, ie, ea, ou, ey, ay, oy, uy, ai.
+ *     (d) have three vowels in immediate succession that are eau, iou (* yes, there are
+ *      exceptions to this that we are ignoring here).
+ *    With the silent-e omitted, two-syllable units:
+ *      (a) two vowels in immediate succession where the vowels are different letters not
+ *      following the rule above. For instance, oe, io, oi.
+ *      (b) three vowels in immediate succession not following the rule above where the last
+ *      vowel is not a silent e. For instance (“eye”) as in “meyer.”
  */
 public class SyllableCounter {
   private static final List<String> oneSyllableTwoVowels =
