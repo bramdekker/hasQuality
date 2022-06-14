@@ -39,6 +39,11 @@ class PatternsTest {
   }
 
   @Test
+  void wildcardVariablesRatioMeasureIsCorrect() {
+    assertTrue(patternsSection.contains("Wildcard-variables ratio: 0.00"));
+  }
+
+  @Test
   void avgDepthOfNestingMeasureIsCorrect() {
     assertTrue(patternsSection.contains("Average depth of nesting: 0.13"));
   }

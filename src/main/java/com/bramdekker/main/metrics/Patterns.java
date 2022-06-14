@@ -16,6 +16,7 @@ public class Patterns {
   private static double avgNumberOfVariables = 0;
   private static double avgNumberOfConstructors = 0;
   private static double avgNumberOfWildcards = 0;
+  private static double wildcardVariablesRatio = 0;
   private static double avgSumDepthOfNesting = 0;
   private static long maxSumDepthOfNesting = 0;
   private static String maxSumDepthOfNestingName = "";
@@ -42,6 +43,7 @@ public class Patterns {
     patternSection.append(
         getMetricString("Average number of constructors", avgNumberOfConstructors));
     patternSection.append(getMetricString("Average number of wildcards", avgNumberOfWildcards));
+    patternSection.append(getMetricString("Wildcard-variables ratio", wildcardVariablesRatio));
     patternSection.append(getMetricString("Average depth of nesting", avgDepthOfNesting));
     patternSection.append(getMetricString("Maximum depth of nesting", maxDepthOfNesting));
     patternSection.append(
@@ -189,6 +191,8 @@ public class Patterns {
       avgDepthOfNesting += metric.depthOfNesting;
       avgPatternSize += metric.patternSize;
     }
+
+    wildcardVariablesRatio = avgNumberOfWildcards / avgNumberOfVariables;
 
     avgNumberOfVariables /= dataPerPattern.size();
     avgNumberOfConstructors /= dataPerPattern.size();
