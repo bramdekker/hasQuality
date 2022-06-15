@@ -13,10 +13,26 @@ import static com.bramdekker.main.util.MetricPrinter.getMetricString;
 //      - Modules/functions
 //      - Modules/type synonyms
 //      - Modules/data classes
+// Cyclomatic complexity:
+//      - If then else, case, patterns, ||, &&
+// Number of operators and operands per function
 
 /** Collection of methods that determine structural metrics. */
 public class Structural {
   private static final List<StructuralFileMetric> dataPerFile = new ArrayList<>();
+  private static final Map<String, CyclomaticComplexityMetric> cycloMap = new HashMap<>();
+  private static long totalBranches = 0;
+  private static long totalOperators = 0;
+  private static long totalOperands = 0;
+  private static double avgCyclomaticComplexity = 0;
+  private static long maxCyclomaticComplexity = 0;
+  private static String maxCyclomaticComplexityName = "";
+  private static double avgNumOperators = 0;
+  private static long maxNumOperators = 0;
+  private static String maxNumOperatorsName = "";
+  private static double avgNumOperands = 0;
+  private static long maxNumOperands = 0;
+  private static String maxNumOperandsName = "";
   private static long totalFunctions = 0;
   private static long totalTypeSynonyms = 0;
   private static long totalDataTypes = 0;
@@ -49,6 +65,23 @@ public class Structural {
 
     calculateMetrics();
     StringBuilder structuralSection = new StringBuilder("Structural metrics:\n");
+
+    structuralSection.append(
+        getMetricString("Average cyclomatic complexity", avgCyclomaticComplexity));
+    structuralSection.append(
+        getMetricString("Maximum cyclomatic complexity", maxCyclomaticComplexity));
+    structuralSection.append(
+        getMetricString("Maximum cyclomatic complexity name", maxCyclomaticComplexityName));
+    structuralSection.append(
+        getMetricString("Average number of operators per function", avgNumOperators));
+    structuralSection.append(getMetricString("Maximum number of operators", maxNumOperators));
+    structuralSection.append(
+        getMetricString("Maximum number of operators name", maxNumOperatorsName));
+    structuralSection.append(
+        getMetricString("Average number of operands per function", avgNumOperands));
+    structuralSection.append(getMetricString("Maximum number of operands", maxNumOperands));
+    structuralSection.append(
+        getMetricString("Maximum number of operands name", maxNumOperandsName));
 
     structuralSection.append(getMetricString("Modules / functions", modulesFunctions));
     structuralSection.append(getMetricString("Modules / type synonyms", modulesTypeSynonyms));
@@ -106,6 +139,8 @@ public class Structural {
       HalsteadVisitor visitor = new HalsteadVisitor();
       visitor.visit(entry.getValue());
 
+      cycloMap.putAll(visitor.getFunctionMap());
+
       dataPerFile.add(
           new StructuralFileMetric(
               entry.getKey(),
@@ -122,11 +157,21 @@ public class Structural {
       totalDataTypes += metric.dataTypes;
       totalTypeSynonyms += metric.typeSynonyms;
     }
+
+    for (CyclomaticComplexityMetric metric : cycloMap.values()) {
+      totalBranches += metric.getNumBranches();
+      totalOperators += metric.getNumOperators();
+      totalOperands += metric.getNumOperands();
+    }
   }
 
   /** Calculate all size metrics and store them as static variables. */
   private static void calculateMetrics() {
     sumFileData();
+
+    avgCyclomaticComplexity = (double) totalBranches / totalFunctions + 1;
+    avgNumOperators = (double) totalOperators / totalFunctions;
+    avgNumOperands = (double) totalOperands / totalFunctions;
 
     avgNumFunctionInModule = (double) totalFunctions / dataPerFile.size();
     avgNumDataTypesInModule = (double) totalDataTypes / dataPerFile.size();
@@ -175,6 +220,30 @@ public class Structural {
     if (minDataTypes.isPresent()) {
       minNumDataTypesInModule = minDataTypes.get().dataTypes;
       minNumDataTypesInModuleName = minDataTypes.get().name;
+    }
+
+    Optional<Map.Entry<String, CyclomaticComplexityMetric>> maxCyclo =
+        cycloMap.entrySet().stream()
+            .max(Comparator.comparingLong(e -> e.getValue().getNumBranches()));
+    if (maxCyclo.isPresent() && maxCyclo.get().getValue().getNumBranches() != 0) {
+      maxCyclomaticComplexity = maxCyclo.get().getValue().getNumBranches();
+      maxCyclomaticComplexityName = maxCyclo.get().getKey();
+    }
+
+    Optional<Map.Entry<String, CyclomaticComplexityMetric>> maxOperators =
+        cycloMap.entrySet().stream()
+            .max(Comparator.comparingLong(e -> e.getValue().getNumOperators()));
+    if (maxOperators.isPresent() && maxOperators.get().getValue().getNumOperators() != 0) {
+      maxNumOperators = maxOperators.get().getValue().getNumOperators();
+      maxNumOperatorsName = maxOperators.get().getKey();
+    }
+
+    Optional<Map.Entry<String, CyclomaticComplexityMetric>> maxOperands =
+        cycloMap.entrySet().stream()
+            .max(Comparator.comparingLong(e -> e.getValue().getNumOperands()));
+    if (maxOperands.isPresent() && maxOperands.get().getValue().getNumOperands() != 0) {
+      maxNumOperands = maxOperands.get().getValue().getNumOperands();
+      maxNumOperandsName = maxOperands.get().getKey();
     }
   }
 }

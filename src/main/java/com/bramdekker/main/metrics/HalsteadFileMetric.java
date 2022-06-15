@@ -7,7 +7,7 @@ public class HalsteadFileMetric {
   public String name;
   public long halsteadLength;
   public long halsteadVocabulary;
-  public long halsteadVolume;
+  public double halsteadVolume;
 
   /**
    * Constructor that sets all data accordingly.
@@ -17,7 +17,7 @@ public class HalsteadFileMetric {
    * @param halVocabulary unique occurrences of operators + unique occurrences of operands.
    * @param halVolume the Halstead volume.
    */
-  public HalsteadFileMetric(String name, long halLength, long halVocabulary, long halVolume) {
+  public HalsteadFileMetric(String name, long halLength, long halVocabulary, double halVolume) {
     this.name = name;
     this.halsteadLength = halLength;
     this.halsteadVocabulary = halVocabulary;

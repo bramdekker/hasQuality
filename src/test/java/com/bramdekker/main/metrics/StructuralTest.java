@@ -10,6 +10,8 @@ import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+// 254 - 6 - 2 = 246 operators / 21 functions = 11.71
+// 242 - 5 = 237 operands / 21 functions = 11.29
 class StructuralTest {
   static String pathToTestResources;
   static String structuralSection;
@@ -21,6 +23,36 @@ class StructuralTest {
     FileList.init(pathToTestResources + "/haskell-project");
     structuralSection = Structural.getSection();
     System.out.println(structuralSection);
+  }
+
+  @Test
+  void avgOperatorsMeasureIsCorrect() {
+    assertTrue(structuralSection.contains("Average number of operators per function: 11.71"));
+  }
+
+  @Test
+  void maxOperatorsMeasureIsCorrect() {
+    assertTrue(structuralSection.contains("Maximum number of operators: 24"));
+  }
+
+  @Test
+  void maxOperatorsNameIsCorrect() {
+    assertTrue(structuralSection.matches("(?s).*Maximum number of operators name: Individual.getIndex'.*$"));
+  }
+
+  @Test
+  void avgOperandsMeasureIsCorrect() {
+    assertTrue(structuralSection.contains("Average number of operands per function: 11.29"));
+  }
+
+  @Test
+  void maxOperandsMeasureIsCorrect() {
+    assertTrue(structuralSection.contains("Maximum number of operands: 28"));
+  }
+
+  @Test
+  void maxOperandsNameIsCorrect() {
+    assertTrue(structuralSection.matches("(?s).*Maximum number of operands name: Individual.getIndex'.*$"));
   }
 
   @Test
