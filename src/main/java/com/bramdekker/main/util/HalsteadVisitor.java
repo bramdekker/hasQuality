@@ -234,7 +234,8 @@ public class HalsteadVisitor extends HaskellParserBaseVisitor<Void> {
   @Override
   public Void visitAlts(HaskellParser.AltsContext ctx) {
     for (int i = 0; i < ctx.getChildCount(); i++) {
-      if (ctx.getChild(i) instanceof HaskellParser.AltContext) {
+      if (ctx.getChild(i) instanceof HaskellParser.AltContext
+              && !getLeftMostChild(ctx.getChild(i)).getText().equals("_")) {
         updateNumBranches(getFunctionName());
       }
     }
