@@ -158,6 +158,10 @@ public class Structural {
       totalTypeSynonyms += metric.typeSynonyms;
     }
 
+    for (Map.Entry<String, CyclomaticComplexityMetric> m : cycloMap.entrySet()) {
+      System.out.printf("Function %s has %d branches%n", m.getKey(), m.getValue().getNumBranches());
+    }
+
     for (CyclomaticComplexityMetric metric : cycloMap.values()) {
       totalBranches += metric.getNumBranches();
       totalOperators += metric.getNumOperators();
@@ -226,7 +230,7 @@ public class Structural {
         cycloMap.entrySet().stream()
             .max(Comparator.comparingLong(e -> e.getValue().getNumBranches()));
     if (maxCyclo.isPresent() && maxCyclo.get().getValue().getNumBranches() != 0) {
-      maxCyclomaticComplexity = maxCyclo.get().getValue().getNumBranches();
+      maxCyclomaticComplexity = maxCyclo.get().getValue().getNumBranches() + 1;
       maxCyclomaticComplexityName = maxCyclo.get().getKey();
     }
 

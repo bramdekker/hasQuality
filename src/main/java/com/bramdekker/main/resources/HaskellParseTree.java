@@ -121,7 +121,11 @@ public class HaskellParseTree {
       moduleContentNode = moduleContentNode.getParent();
     }
 
-    return getLeftMostChild(moduleContentNode.getChild(1)).getText();
+    if (moduleContentNode != null) {
+      return getLeftMostChild(moduleContentNode.getChild(1)).getText();
+    }
+
+    return "";
   }
 
   /**
