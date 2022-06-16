@@ -25,15 +25,15 @@ public class Halstead {
 
   private static long halsteadLength = 0;
   private static long halsteadVocabulary = 0;
-  private static long halsteadVolume = 0;
-  private static long avgHalsteadLength = 0;
+  private static double halsteadVolume = 0;
+  private static double avgHalsteadLength = 0;
   private static long maxHalsteadLength = 0;
   private static String maxHalsteadLengthName = "";
-  private static long avgHalsteadVocabulary = 0;
+  private static double avgHalsteadVocabulary = 0;
   private static long maxHalsteadVocabulary = 0;
   private static String maxHalsteadVocabularyName = "";
-  private static long avgHalsteadVolume = 0;
-  private static long maxHalsteadVolume = 0;
+  private static double avgHalsteadVolume = 0;
+  private static double maxHalsteadVolume = 0;
   private static String maxHalsteadVolumeName = "";
 
   /**
@@ -89,7 +89,7 @@ public class Halstead {
 
       dataPerFile.add(
           new HalsteadFileMetric(
-              file.getCanonicalPath(), length, vocabulary, (long) (length * logN(2, vocabulary))));
+              file.getCanonicalPath(), length, vocabulary, (length * logN(2, vocabulary))));
     }
   }
 
@@ -97,9 +97,11 @@ public class Halstead {
   private static void calculateMetrics() {
     sumFileData();
 
-    avgHalsteadLength = (long) Math.ceil((double) halsteadLength / dataPerFile.size());
-    avgHalsteadVocabulary = (long) Math.ceil((double) halsteadVocabulary / dataPerFile.size());
-    avgHalsteadVolume = (long) Math.ceil((double) halsteadVolume / dataPerFile.size());
+    avgHalsteadLength = (double) halsteadLength / dataPerFile.size();
+    avgHalsteadVocabulary = (double) halsteadVocabulary / dataPerFile.size();
+    avgHalsteadVolume = halsteadVolume / dataPerFile.size();
+
+    halsteadVolume = (double) halsteadLength * logN(2, halsteadVocabulary);
 
     Optional<HalsteadFileMetric> maxLength =
         dataPerFile.stream().max(Comparator.comparingLong(a -> a.halsteadLength));
@@ -116,7 +118,7 @@ public class Halstead {
     }
 
     Optional<HalsteadFileMetric> maxVolume =
-        dataPerFile.stream().max(Comparator.comparingLong(a -> a.halsteadVolume));
+        dataPerFile.stream().max(Comparator.comparingDouble(a -> a.halsteadVolume));
     if (maxVolume.isPresent()) {
       maxHalsteadVolume = maxLength.get().halsteadVolume;
       maxHalsteadVolumeName = maxLength.get().name;

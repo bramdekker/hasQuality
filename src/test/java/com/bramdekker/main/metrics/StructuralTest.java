@@ -10,6 +10,13 @@ import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+// Branches in functions: (1 + 2 + 2 + 1 + 1 + 1 + 1 + 4 + 1) + (1 + 2 + 2 + 1 + 1 + 1 + 1 + 3 + 1 +
+// 1 + 1 + 4) = 33
+// Average cyclomatic complexity = 1.57 + 1
+// Maximum cyclomatic complexity = 5
+// Maximum cyclomatic complexity name: Individual.addList / Puzzles.isPalindrome
+// 254 - 6 - 2 = 246 operators / 21 functions = 11.71
+// 242 - 5 = 237 operands / 21 functions = 11.29
 class StructuralTest {
   static String pathToTestResources;
   static String structuralSection;
@@ -21,6 +28,58 @@ class StructuralTest {
     FileList.init(pathToTestResources + "/haskell-project");
     structuralSection = Structural.getSection();
     System.out.println(structuralSection);
+  }
+
+  @Test
+  void avgCyclomaticComplexityMeasureIsCorrect() {
+    assertTrue(structuralSection.contains("Average cyclomatic complexity: 2.57"));
+  }
+
+  @Test
+  void maxCyclomaticComplexityMeasureIsCorrect() {
+    assertTrue(structuralSection.contains("Maximum cyclomatic complexity: 5"));
+  }
+
+  @Test
+  void maxCyclomaticComplexityNameIsCorrect() {
+    assertTrue(
+        structuralSection.matches("(?s).*Maximum cyclomatic complexity name: Individual.addList.*$")
+            || structuralSection.matches(
+                "(?s).*Maximum cyclomatic complexity name: Puzzles.isPalindrome.*$"));
+  }
+
+  @Test
+  void avgOperatorsMeasureIsCorrect() {
+    assertTrue(structuralSection.contains("Average number of operators per function: 11.71"));
+  }
+
+  @Test
+  void maxOperatorsMeasureIsCorrect() {
+    assertTrue(structuralSection.contains("Maximum number of operators: 24"));
+  }
+
+  @Test
+  void maxOperatorsNameIsCorrect() {
+    assertTrue(
+        structuralSection.matches(
+            "(?s).*Maximum number of operators name: Individual.getIndex'.*$"));
+  }
+
+  @Test
+  void avgOperandsMeasureIsCorrect() {
+    assertTrue(structuralSection.contains("Average number of operands per function: 11.29"));
+  }
+
+  @Test
+  void maxOperandsMeasureIsCorrect() {
+    assertTrue(structuralSection.contains("Maximum number of operands: 28"));
+  }
+
+  @Test
+  void maxOperandsNameIsCorrect() {
+    assertTrue(
+        structuralSection.matches(
+            "(?s).*Maximum number of operands name: Individual.getIndex'.*$"));
   }
 
   @Test
@@ -79,9 +138,7 @@ class StructuralTest {
 
   @Test
   void maxDataTypesInModuleNameIsCorrect() {
-    assertTrue(
-            structuralSection.matches(
-                    "(?s).*Maximum number of data types in module name: .*$"));
+    assertTrue(structuralSection.matches("(?s).*Maximum number of data types in module name: .*$"));
   }
 
   @Test
@@ -92,8 +149,8 @@ class StructuralTest {
   @Test
   void minDataTypesInModuleNameIsCorrect() {
     assertTrue(
-            structuralSection.matches(
-                    "(?s).*Minimum number of data types in module name: .*/Puzzles.hs.*$"));
+        structuralSection.matches(
+            "(?s).*Minimum number of data types in module name: .*/Puzzles.hs.*$"));
   }
 
   @Test
@@ -109,8 +166,8 @@ class StructuralTest {
   @Test
   void maxTypeSynonymsInModuleNameIsCorrect() {
     assertTrue(
-            structuralSection.matches(
-                    "(?s).*Maximum number of type synonyms in module name: .*/Individual.hs.*$"));
+        structuralSection.matches(
+            "(?s).*Maximum number of type synonyms in module name: .*/Individual.hs.*$"));
   }
 
   @Test
@@ -121,7 +178,7 @@ class StructuralTest {
   @Test
   void minTypeSynonymsInModuleNameIsCorrect() {
     assertTrue(
-            structuralSection.matches(
-                    "(?s).*Minimum number of data types in module name: .*/Puzzles.hs.*$"));
+        structuralSection.matches(
+            "(?s).*Minimum number of data types in module name: .*/Puzzles.hs.*$"));
   }
 }

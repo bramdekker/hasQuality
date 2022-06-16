@@ -1,7 +1,13 @@
 package com.bramdekker.main.util;
 
+// Branches:
+// Every if, else, ||, && leaf is a branch
+// Cases: every child of alts is a branch
+// Guards: every guard is a branch except for | otherwise
+// Patterns: every pattern is a branch
 import antlr.HaskellParser;
 import antlr.HaskellParserBaseVisitor;
+import com.bramdekker.main.metrics.CyclomaticComplexityMetric;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
@@ -15,8 +21,10 @@ import java.util.Map;
  */
 public class HalsteadVisitor extends HaskellParserBaseVisitor<Void> {
   private static final LeafVisitor leafVisitor = new LeafVisitor();
-  private static String currentFunction;
-  private static String lastOperator = "";
+  private String currentFunction = "";
+  private String module = "";
+  private String lastOperator = "";
+  private final Map<String, CyclomaticComplexityMetric> functionMap = new HashMap<>();
   private final List<String> functions = new ArrayList<>();
   private final List<String> dataTypes = new ArrayList<>();
   private final List<String> typeSynonyms = new ArrayList<>();
@@ -24,7 +32,10 @@ public class HalsteadVisitor extends HaskellParserBaseVisitor<Void> {
       List.of("}", "]", ")", ",", "<EOF>", "SEMI", "VOCURLY", "VCCURLY");
 
   private static final List<String> possibleTwoCharOperators =
-      List.of("!!", "<=", ">=", "==", "!=", "**", "^^", "++", "||");
+      List.of("!!", "<=", ">=", "==", "!=", "**", "^^", "++", "||", "&&");
+
+  private static final List<String> branchingLeaves =
+          List.of("if", "else", "||", "&&");
 
   private static final List<List<String>> variablesInScope = new ArrayList<>();
   private final Map<String, Integer> operatorMap;
@@ -39,9 +50,41 @@ public class HalsteadVisitor extends HaskellParserBaseVisitor<Void> {
   }
 
   @Override
+  public Void visitModule_content(HaskellParser.Module_contentContext ctx) {
+    currentFunction = "";
+    StringBuilder currentModule = new StringBuilder();
+    ParseTree modid = ctx.getChild(1);
+    for (int i = 0; i < modid.getChildCount(); i++) {
+      currentModule.append(modid.getChild(i).getText());
+    }
+    module = currentModule.toString();
+    super.visitModule_content(ctx);
+
+    if (!lastOperator.isEmpty()) {
+      if (lastOperator.equals("|")) {
+        updateNumBranches(getFunctionName());
+      }
+      updateOperatorMap(lastOperator);
+      updateNumOperators(getFunctionName());
+    }
+
+    return null;
+  }
+
+  @Override
   public Void visitTopdecl(HaskellParser.TopdeclContext ctx) {
     // Top-level declaration has new scope.
+    if (!lastOperator.isEmpty()) {
+      if (lastOperator.equals("|")) {
+        updateNumBranches(getFunctionName());
+      }
+      updateOperatorMap(lastOperator);
+      updateNumOperators(getFunctionName());
+    }
+
+    lastOperator = "";
     variablesInScope.clear();
+    currentFunction = "";
     return super.visitTopdecl(ctx);
   }
 
@@ -70,6 +113,9 @@ public class HalsteadVisitor extends HaskellParserBaseVisitor<Void> {
       if (ctx.getParent() instanceof HaskellParser.TopdeclContext) {
         TerminalNode functionName = leaves.remove(0);
         currentFunction = functionName.getText();
+        if (!(ctx.getChild(0) instanceof HaskellParser.SigdeclContext)) {
+          updateNumBranches(getFunctionName());
+        }
         if (!this.functions.contains(functionName.getText())) {
           this.functions.add(functionName.getText());
         }
@@ -78,7 +124,6 @@ public class HalsteadVisitor extends HaskellParserBaseVisitor<Void> {
       // If right-hand side has a where-clause, add those variables to scope.
       ParseTree connectedWhere = getConnectedWhere(ctx);
       if (connectedWhere != null) {
-        System.out.println("Found a connected where");
         List<TerminalNode> whereLeaves = leafVisitor.visit(connectedWhere);
         List<String> whereVariables = new ArrayList<>();
         for (int i = 0; i < whereLeaves.size() - 1; i++) {
@@ -87,11 +132,11 @@ public class HalsteadVisitor extends HaskellParserBaseVisitor<Void> {
           }
         }
 
-        variablesInScope.add(whereVariables);
+        variablesInScope.add(filterOutOperators(whereVariables));
       }
 
       List<String> leavesNoGuards = removeGuards(leavesToStringList(leaves));
-      variablesInScope.add(leavesNoGuards);
+      variablesInScope.add(filterOutOperators(leavesNoGuards));
     }
 
     return super.visitDecl_no_th(ctx);
@@ -101,11 +146,18 @@ public class HalsteadVisitor extends HaskellParserBaseVisitor<Void> {
   public Void visitTerminal(TerminalNode node) {
     boolean setLastOperator = false;
     String text = node.getText();
+
+    if (branchingLeaves.contains(text)) {
+      updateNumBranches(getFunctionName());
+    }
+
     if (!(ignoredTokens.contains(text))) {
       if (text.equals(currentFunction) && onRightHandSide(node)) {
         updateOperatorMap(text);
+        updateNumOperators(getFunctionName());
       } else if (text.equals(currentFunction)) {
         updateOperandMap(text);
+        updateNumOperands(getFunctionName());
       } else if (inScope(text)
           || isTypeInSigdecl(node)
           || text.equals("_")
@@ -113,20 +165,48 @@ public class HalsteadVisitor extends HaskellParserBaseVisitor<Void> {
           || isLiteral(node)
           || isType(text)) {
         updateOperandMap(text);
+        updateNumOperands(getFunctionName());
       } else {
         if (text.length() == 1 && lastOperator.isEmpty()) {
-          setLastOperator = true;
           lastOperator = text;
+          setLastOperator = true;
         } else if (text.length() == 1 && possibleTwoCharOperators.contains(lastOperator + text)) {
+          if (branchingLeaves.contains(lastOperator + text)) {
+            updateNumBranches(getFunctionName());
+          }
+
           updateOperatorMap(lastOperator + text);
+          updateNumOperators(getFunctionName());
           lastOperator = "";
+        } else if (text.length() == 1) {
+          if (lastOperator.equals("|")) {
+            updateNumBranches(getFunctionName());
+          }
+          updateOperatorMap(lastOperator);
+          updateNumOperators(getFunctionName());
+          lastOperator = text;
+          setLastOperator = true;
         } else {
+          if (!lastOperator.isEmpty()) {
+            if (lastOperator.equals("|")) {
+              updateNumBranches(getFunctionName());
+            }
+            updateOperatorMap(lastOperator);
+            updateNumOperators(getFunctionName());
+            lastOperator = "";
+          }
+
           updateOperatorMap(text);
+          updateNumOperators(getFunctionName());
         }
       }
 
       if (!setLastOperator && !lastOperator.isEmpty()) {
+        if (lastOperator.equals("|") && !text.equals("otherwise")) {
+          updateNumBranches(getFunctionName());
+        }
         updateOperatorMap(lastOperator);
+        updateNumOperators(getFunctionName());
         lastOperator = "";
       }
     }
@@ -139,7 +219,7 @@ public class HalsteadVisitor extends HaskellParserBaseVisitor<Void> {
     if (ctx.getChildCount() > 1 && ctx.getChild(0).getText().equals("\\")) {
       // The second child is apats.
       List<TerminalNode> lambdaParameters = leafVisitor.visit(ctx.getChild(1));
-      variablesInScope.add(leavesToStringList(lambdaParameters));
+      variablesInScope.add(filterOutOperators(leavesToStringList(lambdaParameters)));
     }
 
     super.visitAexp(ctx);
@@ -149,6 +229,40 @@ public class HalsteadVisitor extends HaskellParserBaseVisitor<Void> {
     }
 
     return null;
+  }
+
+  @Override
+  public Void visitAlts(HaskellParser.AltsContext ctx) {
+    for (int i = 0; i < ctx.getChildCount(); i++) {
+      if (ctx.getChild(i) instanceof HaskellParser.AltContext) {
+        updateNumBranches(getFunctionName());
+      }
+    }
+
+    return super.visitAlts(ctx);
+  }
+
+  /**
+   * Filter out operands in the variables list like (, [ and :.
+   *
+   * @param variables the unsanitized variable list.
+   * @return list with only variables.
+   */
+  private static List<String> filterOutOperators(List<String> variables) {
+    return variables.stream().filter(str -> str.matches("[A-Za-z]+")).toList();
+  }
+
+  /**
+   * Get the name of the function potentially prepended with a module name.
+   *
+   * @return the most specific name for the function.
+   */
+  private String getFunctionName() {
+    if (module.isEmpty()) {
+      return currentFunction;
+    }
+
+    return module + "." + currentFunction;
   }
 
   /**
@@ -193,9 +307,9 @@ public class HalsteadVisitor extends HaskellParserBaseVisitor<Void> {
    * @param node the node to be checked.
    * @return true if it is a child of a rhs node; false otherwise.
    */
-  private static boolean onRightHandSide(ParseTree node) {
+  private boolean onRightHandSide(ParseTree node) {
     while (node != null) {
-      if (node instanceof HaskellParser.RhsContext) {
+      if (node instanceof HaskellParser.Exp10pContext || node instanceof HaskellParser.RhsContext) {
         return true;
       }
 
@@ -211,7 +325,7 @@ public class HalsteadVisitor extends HaskellParserBaseVisitor<Void> {
    * @param variable String representing the variable to be checked.
    * @return true if it is in scope; false otherwise.
    */
-  private static boolean inScope(String variable) {
+  private boolean inScope(String variable) {
     for (List<String> scope : variablesInScope) {
       if (scope.contains(variable)) {
         return true;
@@ -227,7 +341,7 @@ public class HalsteadVisitor extends HaskellParserBaseVisitor<Void> {
    * @param node the node to be checked.
    * @return true if the node has a wherebinds as parent; false otherwise.
    */
-  private static boolean inWhereClause(ParseTree node) {
+  private boolean inWhereClause(ParseTree node) {
     while (node != null) {
       if (node instanceof HaskellParser.WherebindsContext) {
         return true;
@@ -246,7 +360,7 @@ public class HalsteadVisitor extends HaskellParserBaseVisitor<Void> {
    * @return true if the node has a sigdecl node as parent and starts with lowercase letter;
    *         false otherwise.
    */
-  private static boolean isTypeInSigdecl(ParseTree node) {
+  private boolean isTypeInSigdecl(ParseTree node) {
     if (node.getText().matches("^[a-zA-Z]*$")) {
       while (node != null) {
         if (node instanceof HaskellParser.SigdeclContext) {
@@ -266,7 +380,7 @@ public class HalsteadVisitor extends HaskellParserBaseVisitor<Void> {
    * @param node the node to be checked.
    * @return true is the grandparent of the node is a literal; false otherwise.
    */
-  private static boolean isLiteral(ParseTree node) {
+  private boolean isLiteral(ParseTree node) {
     return node.getParent().getParent() instanceof HaskellParser.LiteralContext;
   }
 
@@ -274,9 +388,9 @@ public class HalsteadVisitor extends HaskellParserBaseVisitor<Void> {
    * Check if the variable is a type.
    *
    * @param variable the variable to be checked.
-   * @retur true if the variable starts with uppercase; false otherwise.
+   * @return true if the variable starts with uppercase; false otherwise.
    */
-  private static boolean isType(String variable) {
+  private boolean isType(String variable) {
     return Character.isUpperCase(variable.charAt(0));
   }
 
@@ -286,7 +400,7 @@ public class HalsteadVisitor extends HaskellParserBaseVisitor<Void> {
    * @param nodes the List of TerminalNode's to be converted.
    * @return List of Strings containing the text for every TerminalNode.
    */
-  private static List<String> leavesToStringList(List<TerminalNode> nodes) {
+  private List<String> leavesToStringList(List<TerminalNode> nodes) {
     return nodes.stream().map(ParseTree::getText).toList();
   }
 
@@ -297,7 +411,7 @@ public class HalsteadVisitor extends HaskellParserBaseVisitor<Void> {
    * @return the root of the first left subtree with multiple children.
    * @throws RuntimeException if the node does not have any children.
    */
-  private static ParseTree getRootLeftSubtree(ParseTree node) {
+  private ParseTree getRootLeftSubtree(ParseTree node) {
     if (node.getChildCount() == 1) {
       return getRootLeftSubtree(node.getChild(0));
     } else if (node.getChildCount() == 0) {
@@ -313,7 +427,7 @@ public class HalsteadVisitor extends HaskellParserBaseVisitor<Void> {
    * @param node the start node.
    * @return the left most child of the node.
    */
-  private static ParseTree getLeftMostChild(ParseTree node) {
+  private ParseTree getLeftMostChild(ParseTree node) {
     if (node.getChildCount() > 0) {
       return getLeftMostChild(node.getChild(0));
     }
@@ -364,19 +478,12 @@ public class HalsteadVisitor extends HaskellParserBaseVisitor<Void> {
    */
   public long getHalsteadLength() {
     long length = 0;
-    //            System.out.println("Operands: ");
-    //            for (Map.Entry<String, Integer> entry : this.operandMap.entrySet())
-    //              System.out.println(entry.getKey() + " : " + entry.getValue());
     for (int number : this.operandMap.values()) {
       length += number;
     }
-    //            System.out.println("Operators: ");
-    //            for (Map.Entry<String, Integer> entry : this.operatorMap.entrySet())
-    //              System.out.println(entry.getKey() + " : " + entry.getValue());
     for (int number : this.operatorMap.values()) {
       length += number;
     }
-    System.out.println();
     return length;
   }
 
@@ -413,5 +520,45 @@ public class HalsteadVisitor extends HaskellParserBaseVisitor<Void> {
     } else {
       operatorMap.put(key, 1);
     }
+  }
+
+  private void updateNumBranches(String key) {
+    if (key.endsWith(".")) {
+      return;
+    }
+
+    if (functionMap.containsKey(key)) {
+      functionMap.put(key, functionMap.get(key).incrementNumBranches());
+    } else {
+      functionMap.put(key, new CyclomaticComplexityMetric().incrementNumBranches());
+    }
+  }
+
+  private void updateNumOperators(String key) {
+    if (key.endsWith(".")) {
+      return;
+    }
+
+    if (functionMap.containsKey(key)) {
+      functionMap.put(key, functionMap.get(key).incrementNumOperators());
+    } else {
+      functionMap.put(key, new CyclomaticComplexityMetric().incrementNumOperators());
+    }
+  }
+
+  private void updateNumOperands(String key) {
+    if (key.endsWith(".")) {
+      return;
+    }
+
+    if (functionMap.containsKey(key)) {
+      functionMap.put(key, functionMap.get(key).incrementNumOperands());
+    } else {
+      functionMap.put(key, new CyclomaticComplexityMetric().incrementNumOperands());
+    }
+  }
+
+  public Map<String, CyclomaticComplexityMetric> getFunctionMap() {
+    return this.functionMap;
   }
 }
