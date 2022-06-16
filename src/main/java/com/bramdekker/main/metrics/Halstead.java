@@ -101,6 +101,8 @@ public class Halstead {
     avgHalsteadVocabulary = (double) halsteadVocabulary / dataPerFile.size();
     avgHalsteadVolume = halsteadVolume / dataPerFile.size();
 
+    halsteadVolume = (double) halsteadLength * logN(2, halsteadVocabulary);
+
     Optional<HalsteadFileMetric> maxLength =
         dataPerFile.stream().max(Comparator.comparingLong(a -> a.halsteadLength));
     if (maxLength.isPresent()) {

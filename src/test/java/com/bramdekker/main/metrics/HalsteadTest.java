@@ -12,16 +12,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 // test-project
 // Halstead length: 291 + 205 = 496
-// Halstead vocabulary: (22 + 27) + (31 + 38) = 49 + 69 (70) = 118 (119)
-// Halstead volume: 3420.67
+// Halstead vocabulary: (22 + 27) + (32 + 38) = 49 + 70 = 119
+// Halstead volume: 3419.83
 // avgHalsteadLength: 248.00
 // maxHalsteadLength: 291
 // maxHalsteadLengthName: Individual.hs
 // avgHalsteadVocabulary: 59 (59.50)
 // maxHalsteadVocabulary: 69 (70)
 // maxHalsteadVocabularyName: Individual.hs
-// avgHalsteadVolume: 1151.02 + 1783.69 / 2 = 1467.35
-// maxHalsteadVolume: 1783.69
+// avgHalsteadVolume: 1151.02 + 1783.62 / 2 = 1467.32
+// maxHalsteadVolume: 1783.62
 // maxHalsteadVolumeName: Individual.hs
 class HalsteadTest {
   static String pathToTestResources;
@@ -58,17 +58,17 @@ class HalsteadTest {
 
   @Test
   void halsteadVocabularyMeasureIsCorrect() {
-    assertTrue(halsteadSection.contains("Halstead vocabulary: 118"));
+    assertTrue(halsteadSection.contains("Halstead vocabulary: 119"));
   }
 
   @Test
   void avgHalsteadVocabularyIsCorrect() {
-    assertTrue(halsteadSection.contains("Average Halstead vocabulary: 59.00"));
+    assertTrue(halsteadSection.contains("Average Halstead vocabulary: 59.50"));
   }
 
   @Test
   void maxHalsteadVocabularyIsCorrect() {
-    assertTrue(halsteadSection.contains("Maximum Halstead vocabulary: 69"));
+    assertTrue(halsteadSection.contains("Maximum Halstead vocabulary: 70"));
   }
 
   @Test
@@ -78,17 +78,17 @@ class HalsteadTest {
 
   @Test
   void halsteadVolumeMeasureIsCorrect() {
-    assertTrue(halsteadSection.contains("Halstead volume: 3420.67"));
+    assertTrue(halsteadSection.contains("Halstead volume: 3419.83"));
   }
 
   @Test
   void avgHalsteadVolumeIsCorrect() {
-    assertTrue(halsteadSection.contains("Average Halstead volume: 1467.35"));
+    assertTrue(halsteadSection.contains("Average Halstead volume: 1467.32"));
   }
 
   @Test
   void maxHalsteadVolumeIsCorrect() {
-    assertTrue(halsteadSection.contains("Maximum Halstead volume: 1783.69"));
+    assertTrue(halsteadSection.contains("Maximum Halstead volume: 1783.62"));
   }
 
   @Test
