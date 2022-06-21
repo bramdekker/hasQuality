@@ -104,6 +104,10 @@ public class Size {
         // Line separator is excluded from nextLine, hence the +1.
         charsInFile += curLine.length() + 1;
 
+        if (inTypeSynonymOrDataType && (isBlank(curLine) || isEndOfDataDeclaration(curLine))) {
+          inTypeSynonymOrDataType = false;
+        }
+
         if (curLine.startsWith("module ")) {
           inModuleExports = true;
         } else if (curLine.startsWith("data ") || curLine.startsWith("type ")) {
@@ -130,10 +134,6 @@ public class Size {
 
         if (inModuleExports && isEndOfModuleExport(curLine)) {
           inModuleExports = false;
-        }
-
-        if (inTypeSynonymOrDataType && isEndOfTypeSynonymOrDataType(curLine)) {
-          inTypeSynonymOrDataType = false;
         }
       }
 
@@ -250,11 +250,23 @@ public class Size {
     return line.startsWith("import ") || line.startsWith("{-#");
   }
 
+  /**
+   * Check whether a line is the end of the module export section.
+   *
+   * @param line String representing a line.
+   * @return true if line is the end of the module export section; false otherwise;
+   */
   private static boolean isEndOfModuleExport(String line) {
-    return line.equals("where") || line.endsWith(" where") || line.contains(" where ");
+    return line.equals("where") || line.endsWith(" where");
   }
 
-  private static boolean isEndOfTypeSynonymOrDataType(String line) {
+  /**
+   * Check whether the line is the end of a type synonym or data type.
+   *
+   * @param line String representing a line.
+   * @return true if line is the end of a type synonym or data type.
+   */
+  private static boolean isEndOfDataDeclaration(String line) {
     return !Character.isWhitespace(line.charAt(0));
   }
 
