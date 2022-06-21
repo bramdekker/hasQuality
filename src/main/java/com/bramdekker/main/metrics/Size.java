@@ -9,6 +9,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
 
+import static com.bramdekker.main.util.MathUtil.giniCoefficient;
 import static com.bramdekker.main.util.MetricPrinter.getMetricString;
 
 // - lines of code (LOC)
@@ -42,6 +43,7 @@ public class Size {
   private static long parseTreeSize = 0;
   private static long avgModuleSize = 0;
   private static long maxModuleSize = 0;
+  private static double sizeGiniCoefficient = 0.0;
   private static String maxModuleName = "";
 
   /**
@@ -70,6 +72,9 @@ public class Size {
       sizeSection.append(getMetricString("Average module size (NCLOC)", avgModuleSize));
       sizeSection.append(getMetricString("Maximum module size (NCLOC)", maxModuleSize));
       sizeSection.append(getMetricString("Maximum module size file", maxModuleName));
+      sizeSection.append(getMetricString(
+              "Module size inequality (Gini-coefficient on NCLOC)", sizeGiniCoefficient
+      ));
     }
 
     return sizeSection.toString();
@@ -165,6 +170,10 @@ public class Size {
       maxModuleSize = maxSize.get().ncloc;
       maxModuleName = maxSize.get().name;
     }
+
+    sizeGiniCoefficient = giniCoefficient(
+            dataPerFile.stream().map(data -> (double) data.ncloc).toList()
+    );
   }
 
   /**

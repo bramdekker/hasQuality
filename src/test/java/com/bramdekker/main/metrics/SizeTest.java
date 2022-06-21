@@ -17,12 +17,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 // (30 + 23) / 2 = 26.5 -> 27 avg module size
 // 30 = max module size
 // 31 + 27 = 58 comment lines
+// 23 + 30 = 53 non-comment lines
 // 53 code lines
 // Size in bytes: 2.686 + 2.146= 4832 bytes
 // Size in characters: 4832 characters
 // Executable statements: 27 + 21 = 48
 // Delivered Source instructions: 53
 // Biggest module: Individual.hs
+// Size inequality (NCLOC): 0.07
 class SizeTest {
   static String pathToTestResources;
   static String sizeSection;
@@ -89,5 +91,10 @@ class SizeTest {
   @Test
   void maxModuleSizeNameIsCorrect() {
     assertTrue(sizeSection.matches("(?s).*Maximum module size file: .*/Individual.hs.*$"));
+  }
+
+  @Test
+  void sizeInequalityMeasureIsCorrect() {
+    assertTrue(sizeSection.contains("Module size inequality (Gini-coefficient on NCLOC): 0.07"));
   }
 }
