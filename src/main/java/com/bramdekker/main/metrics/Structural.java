@@ -67,11 +67,11 @@ public class Structural {
     StringBuilder structuralSection = new StringBuilder("Structural metrics:\n");
 
     structuralSection.append(
-        getMetricString("Average cyclomatic complexity", avgCyclomaticComplexity));
+        getMetricString("Average McCabe's cyclomatic complexity", avgCyclomaticComplexity));
     structuralSection.append(
-        getMetricString("Maximum cyclomatic complexity", maxCyclomaticComplexity));
+        getMetricString("Maximum McCabe's cyclomatic complexity", maxCyclomaticComplexity));
     structuralSection.append(
-        getMetricString("Maximum cyclomatic complexity name", maxCyclomaticComplexityName));
+        getMetricString("Maximum McCabe's cyclomatic complexity name", maxCyclomaticComplexityName));
     structuralSection.append(
         getMetricString("Average number of operators per function", avgNumOperators));
     structuralSection.append(getMetricString("Maximum number of operators", maxNumOperators));

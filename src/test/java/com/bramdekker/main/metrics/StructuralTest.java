@@ -32,20 +32,19 @@ class StructuralTest {
 
   @Test
   void avgCyclomaticComplexityMeasureIsCorrect() {
-    assertTrue(structuralSection.contains("Average cyclomatic complexity: 2.62"));
+    assertTrue(structuralSection.contains("Average McCabe's cyclomatic complexity: 2.62"));
   }
 
   @Test
   void maxCyclomaticComplexityMeasureIsCorrect() {
-    assertTrue(structuralSection.contains("Maximum cyclomatic complexity: 6"));
+    assertTrue(structuralSection.contains("Maximum McCabe's cyclomatic complexity: 6"));
   }
 
   @Test
   void maxCyclomaticComplexityNameIsCorrect() {
-    assertTrue(
-        structuralSection.matches("(?s).*Maximum cyclomatic complexity name: Individual.addList.*$")
-            || structuralSection.matches(
-                "(?s).*Maximum cyclomatic complexity name: Puzzles.isPalindrome.*$"));
+    assertTrue(structuralSection.matches(
+            "(?s).*Maximum McCabe's cyclomatic complexity name: Puzzles.isPalindrome.*$"
+    ));
   }
 
   @Test
