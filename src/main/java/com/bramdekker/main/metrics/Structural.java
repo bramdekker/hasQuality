@@ -71,7 +71,8 @@ public class Structural {
     structuralSection.append(
         getMetricString("Maximum McCabe's cyclomatic complexity", maxCyclomaticComplexity));
     structuralSection.append(
-        getMetricString("Maximum McCabe's cyclomatic complexity name", maxCyclomaticComplexityName));
+        getMetricString("Maximum McCabe's cyclomatic complexity name", maxCyclomaticComplexityName)
+    );
     structuralSection.append(
         getMetricString("Average number of operators per function", avgNumOperators));
     structuralSection.append(getMetricString("Maximum number of operators", maxNumOperators));

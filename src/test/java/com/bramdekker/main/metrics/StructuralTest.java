@@ -10,11 +10,11 @@ import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-// Branches in functions: (1 + 2 + 2 + 1 + 1 + 1 + 1 + 4 + 1) + (1 + 2 + 2 + 1 + 1 + 1 + 1 + 3 + 1 +
-// 1 + 1 + 4) = 33
-// Average cyclomatic complexity = 1.57 + 1
+// Cyclomatic complexity in functions: (1 + 2 + 3 + 2 + 2 + 2 + 2 + 5 + 1) + (1 + 2 + 3 + 2 + 2 +
+// 2 + 2 + 3 + 2 + 1 + 2 + 5) = 47 - 21 = 26 branches
+// Average cyclomatic complexity = 47 / 21 = 2.24
 // Maximum cyclomatic complexity = 5
-// Maximum cyclomatic complexity name: Individual.addList / Puzzles.isPalindrome
+// Maximum cyclomatic complexity name: Puzzles.isPalindrome / Individual.addList
 // 254 - 6 - 2 = 246 operators / 21 functions = 11.71
 // 242 - 5 = 237 operands / 21 functions = 11.29
 class StructuralTest {
@@ -32,19 +32,22 @@ class StructuralTest {
 
   @Test
   void avgCyclomaticComplexityMeasureIsCorrect() {
-    assertTrue(structuralSection.contains("Average McCabe's cyclomatic complexity: 2.62"));
+    assertTrue(structuralSection.contains("Average McCabe's cyclomatic complexity: 2.24"));
   }
 
   @Test
   void maxCyclomaticComplexityMeasureIsCorrect() {
-    assertTrue(structuralSection.contains("Maximum McCabe's cyclomatic complexity: 6"));
+    assertTrue(structuralSection.contains("Maximum McCabe's cyclomatic complexity: 5"));
   }
 
   @Test
   void maxCyclomaticComplexityNameIsCorrect() {
-    assertTrue(structuralSection.matches(
-            "(?s).*Maximum McCabe's cyclomatic complexity name: Puzzles.isPalindrome.*$"
-    ));
+    assertTrue(
+        structuralSection.matches(
+                "(?s).*Maximum McCabe's cyclomatic complexity name: Puzzles.isPalindrome.*$")
+            || structuralSection.matches(
+                "(?s).*Maximum McCabe's cyclomatic complexity name: Individual.addList.*$")
+    );
   }
 
   @Test

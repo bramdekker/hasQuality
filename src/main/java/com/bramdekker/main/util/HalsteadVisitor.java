@@ -1,9 +1,9 @@
 package com.bramdekker.main.util;
 
 // Branches:
-// Every if, else, ||, && leaf is a branch
+// Every if, ||, && leaf is a branch
 // Cases: every child of alts is a branch except for _
-// Guards: every guard is a branch
+// Guards: every guard is a branch except for | otherwise
 // Patterns: every function pattern is a branch except for _
 import antlr.HaskellParser;
 import antlr.HaskellParserBaseVisitor;
@@ -22,6 +22,7 @@ import java.util.Map;
 public class HalsteadVisitor extends HaskellParserBaseVisitor<Void> {
   private static final LeafVisitor leafVisitor = new LeafVisitor();
   private String currentFunction = "";
+  private String previousFunction = "";
   private String module = "";
   private String lastOperator = "";
   private final Map<String, CyclomaticComplexityMetric> functionMap = new HashMap<>();
@@ -35,14 +36,16 @@ public class HalsteadVisitor extends HaskellParserBaseVisitor<Void> {
       List.of("!!", "<=", ">=", "==", "!=", "**", "^^", "++", "||", "&&");
 
   private static final List<String> branchingLeaves =
-          List.of("if", "else", "||", "&&");
+          List.of("if", "||", "&&");
 
   private static final List<List<String>> variablesInScope = new ArrayList<>();
   private final Map<String, Integer> operatorMap;
   private final Map<String, Integer> operandMap;
-  private boolean lastBranchWasWildcard = false;
-  private String lastBranchWildcardFunctionName = "";
-  private boolean inCaseWildcard = false;
+
+  // Every if, ||, && leaf is a branch
+  // Cases: every child of alts is a branch except for _
+  // Guards: every guard is a branch except for | otherwise
+  // Patterns: every function pattern is a branch except for _
 
   /**
    * Initialize the operand and operator dictionaries.
@@ -57,17 +60,9 @@ public class HalsteadVisitor extends HaskellParserBaseVisitor<Void> {
     super.visitModule(ctx);
 
     if (!lastOperator.isEmpty()) {
-      if (lastOperator.equals("|")) {
-        incrementNumBranches(getFunctionName());
-      }
       updateOperatorMap(lastOperator);
       updateNumOperators(getFunctionName());
     }
-
-    if (lastBranchWasWildcard && lastBranchWildcardFunctionName.equals(getFunctionName())) {
-      incrementNumBranches(getFunctionName());
-    }
-
     return null;
   }
 
@@ -88,10 +83,7 @@ public class HalsteadVisitor extends HaskellParserBaseVisitor<Void> {
       }
       updateOperatorMap(lastOperator);
       updateNumOperators(getFunctionName());
-    }
-
-    if (lastBranchWasWildcard && lastBranchWildcardFunctionName.equals(getFunctionName())) {
-      incrementNumBranches(getFunctionName());
+      lastOperator = "";
     }
 
     return null;
@@ -106,10 +98,6 @@ public class HalsteadVisitor extends HaskellParserBaseVisitor<Void> {
       }
       updateOperatorMap(lastOperator);
       updateNumOperators(getFunctionName());
-    }
-
-    if (lastBranchWasWildcard && lastBranchWildcardFunctionName.equals(getFunctionName())) {
-      incrementNumBranches(getFunctionName());
     }
 
     lastOperator = "";
@@ -143,7 +131,8 @@ public class HalsteadVisitor extends HaskellParserBaseVisitor<Void> {
       if (ctx.getParent() instanceof HaskellParser.TopdeclContext) {
         TerminalNode functionName = leaves.remove(0);
         currentFunction = functionName.getText();
-        if (!(ctx.getChild(0) instanceof HaskellParser.SigdeclContext) && !isWildcardPattern(leaves)) {
+        if (!(ctx.getChild(0) instanceof HaskellParser.SigdeclContext)
+                && !isWildcardPattern(leaves)) {
           incrementNumBranches(getFunctionName());
         }
         if (!this.functions.contains(functionName.getText())) {
@@ -194,12 +183,6 @@ public class HalsteadVisitor extends HaskellParserBaseVisitor<Void> {
           || (lastOperator.equals("|") && text.equals("otherwise"))
           || isLiteral(node)
           || isType(text)) {
-        if (text.equals("_") && isMatchAllInFunctionPattern(node)) {
-          lastBranchWasWildcard = true;
-          lastBranchWildcardFunctionName = getFunctionName();
-          decrementNumBranches(getFunctionName());
-        }
-
         updateOperandMap(text);
         updateNumOperands(getFunctionName());
       } else {
@@ -238,7 +221,7 @@ public class HalsteadVisitor extends HaskellParserBaseVisitor<Void> {
       }
 
       if (!setLastOperator && !lastOperator.isEmpty()) {
-        if (lastOperator.equals("|")) {
+        if (lastOperator.equals("|") && !text.equals("otherwise")) {
           incrementNumBranches(getFunctionName());
         }
         updateOperatorMap(lastOperator);
@@ -270,11 +253,9 @@ public class HalsteadVisitor extends HaskellParserBaseVisitor<Void> {
   @Override
   public Void visitAlts(HaskellParser.AltsContext ctx) {
     for (int i = 0; i < ctx.getChildCount(); i++) {
-      if (ctx.getChild(i) instanceof HaskellParser.AltContext) {
+      if (ctx.getChild(i) instanceof HaskellParser.AltContext
+              && !getLeftMostChild(ctx.getChild(i)).getText().equals("_")) {
         incrementNumBranches(getFunctionName());
-        if (getLeftMostChild(ctx.getChild(i)).getText().equals("_")) {
-          inCaseWildcard = true;
-        }
       }
 
     }
@@ -335,7 +316,7 @@ public class HalsteadVisitor extends HaskellParserBaseVisitor<Void> {
    * @return true if it is a wildcard pattern; false otherwise.
    */
   private boolean isWildcardPattern(List<TerminalNode> leaves) {
-    return leaves.size() == 1 && leaves.get(0).getText().equals("_");
+    return leaves.size() == 0 || leaves.size() == 1 && leaves.get(0).getText().equals("_");
   }
 
   /**
@@ -619,14 +600,7 @@ public class HalsteadVisitor extends HaskellParserBaseVisitor<Void> {
   }
 
   private void incrementNumBranches(String key) {
-    lastBranchWasWildcard = false;
-
     if (key.endsWith(".")) {
-      return;
-    }
-
-    if (inCaseWildcard) {
-      inCaseWildcard = false;
       return;
     }
 
