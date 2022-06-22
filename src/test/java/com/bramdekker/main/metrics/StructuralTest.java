@@ -32,12 +32,12 @@ class StructuralTest {
 
   @Test
   void avgCyclomaticComplexityMeasureIsCorrect() {
-    assertTrue(structuralSection.contains("Average cyclomatic complexity: 2.57"));
+    assertTrue(structuralSection.contains("Average cyclomatic complexity: 2.62"));
   }
 
   @Test
   void maxCyclomaticComplexityMeasureIsCorrect() {
-    assertTrue(structuralSection.contains("Maximum cyclomatic complexity: 5"));
+    assertTrue(structuralSection.contains("Maximum cyclomatic complexity: 6"));
   }
 
   @Test
