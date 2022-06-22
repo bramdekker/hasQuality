@@ -16,6 +16,11 @@ public class CyclomaticComplexityMetric {
     return this;
   }
 
+  public CyclomaticComplexityMetric decrementNumBranches() {
+    this.numBranches--;
+    return this;
+  }
+
   public CyclomaticComplexityMetric incrementNumOperators() {
     this.numOperators++;
     return this;

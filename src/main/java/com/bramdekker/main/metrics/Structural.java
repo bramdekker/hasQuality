@@ -225,7 +225,7 @@ public class Structural {
     Optional<Map.Entry<String, CyclomaticComplexityMetric>> maxCyclo =
         cycloMap.entrySet().stream()
             .max(Comparator.comparingLong(e -> e.getValue().getNumBranches()));
-    if (maxCyclo.isPresent() && maxCyclo.get().getValue().getNumBranches() != 0) {
+    if (maxCyclo.isPresent()) {
       maxCyclomaticComplexity = maxCyclo.get().getValue().getNumBranches() + 1;
       maxCyclomaticComplexityName = maxCyclo.get().getKey();
     }
