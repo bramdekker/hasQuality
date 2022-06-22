@@ -28,10 +28,7 @@ jobs:
         distribution: 'corretto'
         cache: 'gradle'
     - name: Build with Gradle
-      run: ./gradlew build
-#       uses: gradle/gradle-build-action@0d13054264b0bb894ded474f08ebb30921341cee
-#       with:
-#         arguments: build
+      run: ./gradlew build -x test
         
   test:
     needs: build
@@ -57,7 +54,7 @@ jobs:
         java-version: '17'
         distribution: 'corretto'
         cache: 'gradle'
-#     - name: Give gradle permissions
-#       run: chmod +x ./gradlew
     - name: Check code style
       run: ./gradlew checkstyleMain
+    - name: Check code style in tests
+      run: ./gradlew checkstyleTest
