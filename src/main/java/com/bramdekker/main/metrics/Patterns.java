@@ -63,9 +63,6 @@ public class Patterns {
   private static void collectFileData() throws IOException {
     for (Map.Entry<String, ParseTree> entry :
         HaskellParseTree.getInstance().getPatternDict().entrySet()) {
-      boolean inGuard = true;
-      boolean lastTokenWasEquals = false;
-      boolean lastTokenWasPipe = false;
       LeafVisitor leafVisitor = new LeafVisitor();
       List<TerminalNode> leaves = leafVisitor.visit(entry.getValue());
       leaves.remove(0);
@@ -79,20 +76,8 @@ public class Patterns {
 
       for (TerminalNode leaf : leaves) {
         String leafText = leaf.getSymbol().getText();
-        if (lastTokenWasEquals && !leafText.equals("=")) {
-          inGuard = false;
-          lastTokenWasEquals = false;
-        } else if (lastTokenWasPipe && !leafText.equals("|")) {
-          inGuard = true;
-          lastTokenWasPipe = false;
-        } else if (leafText.equals("|")) {
-          lastTokenWasPipe = !lastTokenWasPipe;
-        } else if (leafText.equals("=")) {
-          lastTokenWasEquals = !lastTokenWasEquals;
-        }
-
-        if (!inGuard) {
-          continue;
+        if (leafText.equals("|")) {
+          break;
         }
 
         if (leafText.equals("_")) {
@@ -107,7 +92,7 @@ public class Patterns {
           }
         } else if (leafText.equals("]") || leafText.equals(")")) {
           curDepth--;
-        } else if (Character.isLowerCase(leafText.charAt(0))) {
+        } else if (Character.isLowerCase(leafText.charAt(0)) || isLiteral(leafText)) {
           numberOfVariables++;
         }
       }
@@ -123,13 +108,27 @@ public class Patterns {
               getTreeSize(entry.getValue())));
     }
 
-    for (ParseTree letPattern : HaskellParseTree.getInstance().getLetInList()) {
+    for (ParseTree letPattern : HaskellParseTree.getInstance().getLetInPatternsList()) {
       analyzePatternNode(letPattern, "let (line %d)");
     }
 
-    for (ParseTree whereClause : HaskellParseTree.getInstance().getWhereList()) {
+    for (ParseTree whereClause : HaskellParseTree.getInstance().getWherePatternsList()) {
       analyzePatternNode(whereClause, "where (line %d)");
     }
+
+    for (ParseTree casePattern : HaskellParseTree.getInstance().getCasePatternsList()) {
+      analyzePatternNode(casePattern, "case (line %d)");
+    }
+  }
+
+  /**
+   * Check if the text is a string, character or integer literal.
+   *
+   * @param text String to be checked.
+   * @return true if text is a literal; false otherwise.
+   */
+  private static boolean isLiteral(String text) {
+    return text.startsWith("\"") || text.startsWith("'") || Character.isDigit(text.charAt(0));
   }
 
   /**
@@ -163,7 +162,7 @@ public class Patterns {
         }
       } else if (leafText.equals("]") || leafText.equals(")")) {
         curDepth--;
-      } else if (Character.isLowerCase(leafText.charAt(0))) {
+      } else if (Character.isLowerCase(leafText.charAt(0)) || isLiteral(leafText)) {
         numberOfVariables++;
       }
     }

@@ -1,10 +1,10 @@
 package com.bramdekker.main.util;
 
 // Branches:
-// Every if, else, ||, && leaf is a branch
-// Cases: every child of alts is a branch
+// Every if, ||, && leaf is a branch
+// Cases: every child of alts is a branch except for _
 // Guards: every guard is a branch except for | otherwise
-// Patterns: every pattern is a branch
+// Patterns: every function pattern is a branch except for _
 import antlr.HaskellParser;
 import antlr.HaskellParserBaseVisitor;
 import com.bramdekker.main.metrics.CyclomaticComplexityMetric;
@@ -22,6 +22,7 @@ import java.util.Map;
 public class HalsteadVisitor extends HaskellParserBaseVisitor<Void> {
   private static final LeafVisitor leafVisitor = new LeafVisitor();
   private String currentFunction = "";
+  private String previousFunction = "";
   private String module = "";
   private String lastOperator = "";
   private final Map<String, CyclomaticComplexityMetric> functionMap = new HashMap<>();
@@ -35,11 +36,16 @@ public class HalsteadVisitor extends HaskellParserBaseVisitor<Void> {
       List.of("!!", "<=", ">=", "==", "!=", "**", "^^", "++", "||", "&&");
 
   private static final List<String> branchingLeaves =
-          List.of("if", "else", "||", "&&");
+          List.of("if", "||", "&&");
 
   private static final List<List<String>> variablesInScope = new ArrayList<>();
   private final Map<String, Integer> operatorMap;
   private final Map<String, Integer> operandMap;
+
+  // Every if, ||, && leaf is a branch
+  // Cases: every child of alts is a branch except for _
+  // Guards: every guard is a branch except for | otherwise
+  // Patterns: every function pattern is a branch except for _
 
   /**
    * Initialize the operand and operator dictionaries.
@@ -47,6 +53,17 @@ public class HalsteadVisitor extends HaskellParserBaseVisitor<Void> {
   public HalsteadVisitor() {
     this.operatorMap = new HashMap<>();
     this.operandMap = new HashMap<>();
+  }
+
+  @Override
+  public Void visitModule(HaskellParser.ModuleContext ctx) {
+    super.visitModule(ctx);
+
+    if (!lastOperator.isEmpty()) {
+      updateOperatorMap(lastOperator);
+      updateNumOperators(getFunctionName());
+    }
+    return null;
   }
 
   @Override
@@ -62,10 +79,11 @@ public class HalsteadVisitor extends HaskellParserBaseVisitor<Void> {
 
     if (!lastOperator.isEmpty()) {
       if (lastOperator.equals("|")) {
-        updateNumBranches(getFunctionName());
+        incrementNumBranches(getFunctionName());
       }
       updateOperatorMap(lastOperator);
       updateNumOperators(getFunctionName());
+      lastOperator = "";
     }
 
     return null;
@@ -76,7 +94,7 @@ public class HalsteadVisitor extends HaskellParserBaseVisitor<Void> {
     // Top-level declaration has new scope.
     if (!lastOperator.isEmpty()) {
       if (lastOperator.equals("|")) {
-        updateNumBranches(getFunctionName());
+        incrementNumBranches(getFunctionName());
       }
       updateOperatorMap(lastOperator);
       updateNumOperators(getFunctionName());
@@ -113,8 +131,9 @@ public class HalsteadVisitor extends HaskellParserBaseVisitor<Void> {
       if (ctx.getParent() instanceof HaskellParser.TopdeclContext) {
         TerminalNode functionName = leaves.remove(0);
         currentFunction = functionName.getText();
-        if (!(ctx.getChild(0) instanceof HaskellParser.SigdeclContext)) {
-          updateNumBranches(getFunctionName());
+        if (!(ctx.getChild(0) instanceof HaskellParser.SigdeclContext)
+                && !isWildcardPattern(leaves)) {
+          incrementNumBranches(getFunctionName());
         }
         if (!this.functions.contains(functionName.getText())) {
           this.functions.add(functionName.getText());
@@ -148,7 +167,7 @@ public class HalsteadVisitor extends HaskellParserBaseVisitor<Void> {
     String text = node.getText();
 
     if (branchingLeaves.contains(text)) {
-      updateNumBranches(getFunctionName());
+      incrementNumBranches(getFunctionName());
     }
 
     if (!(ignoredTokens.contains(text))) {
@@ -172,7 +191,7 @@ public class HalsteadVisitor extends HaskellParserBaseVisitor<Void> {
           setLastOperator = true;
         } else if (text.length() == 1 && possibleTwoCharOperators.contains(lastOperator + text)) {
           if (branchingLeaves.contains(lastOperator + text)) {
-            updateNumBranches(getFunctionName());
+            incrementNumBranches(getFunctionName());
           }
 
           updateOperatorMap(lastOperator + text);
@@ -180,7 +199,7 @@ public class HalsteadVisitor extends HaskellParserBaseVisitor<Void> {
           lastOperator = "";
         } else if (text.length() == 1) {
           if (lastOperator.equals("|")) {
-            updateNumBranches(getFunctionName());
+            incrementNumBranches(getFunctionName());
           }
           updateOperatorMap(lastOperator);
           updateNumOperators(getFunctionName());
@@ -189,7 +208,7 @@ public class HalsteadVisitor extends HaskellParserBaseVisitor<Void> {
         } else {
           if (!lastOperator.isEmpty()) {
             if (lastOperator.equals("|")) {
-              updateNumBranches(getFunctionName());
+              incrementNumBranches(getFunctionName());
             }
             updateOperatorMap(lastOperator);
             updateNumOperators(getFunctionName());
@@ -203,7 +222,7 @@ public class HalsteadVisitor extends HaskellParserBaseVisitor<Void> {
 
       if (!setLastOperator && !lastOperator.isEmpty()) {
         if (lastOperator.equals("|") && !text.equals("otherwise")) {
-          updateNumBranches(getFunctionName());
+          incrementNumBranches(getFunctionName());
         }
         updateOperatorMap(lastOperator);
         updateNumOperators(getFunctionName());
@@ -236,11 +255,68 @@ public class HalsteadVisitor extends HaskellParserBaseVisitor<Void> {
     for (int i = 0; i < ctx.getChildCount(); i++) {
       if (ctx.getChild(i) instanceof HaskellParser.AltContext
               && !getLeftMostChild(ctx.getChild(i)).getText().equals("_")) {
-        updateNumBranches(getFunctionName());
+        incrementNumBranches(getFunctionName());
       }
+
     }
 
     return super.visitAlts(ctx);
+  }
+
+  /**
+   * Checks whether the wildcard matches all in a function pattern.
+   *
+   * @param leaf the TerminalNode that is the wildcard.
+   * @return true if the wildcard matches all patterns in a function pattern; false otherwise.
+   */
+  private boolean isMatchAllInFunctionPattern(TerminalNode leaf) {
+    ParseTree topdeclParent = getTopdeclParent(leaf);
+
+    if (topdeclParent.getChild(0) instanceof HaskellParser.Decl_no_thContext) {
+      ParseTree fexp = topdeclParent.getChild(0);
+
+      while (!(fexp instanceof HaskellParser.FexpContext)) {
+        if (fexp.getChildCount() != 1) {
+          return false;
+        }
+        fexp = fexp.getChild(0);
+      }
+
+      ParseTree aexp = fexp.getChild(1);
+
+      while (aexp.getChildCount() == 1) {
+        aexp = aexp.getChild(0);
+      }
+
+      return aexp.getText().equals("_");
+    }
+
+    return false;
+  }
+
+  /**
+   * Get the topdecl parent node of the leaf.
+   *
+   * @param leaf the leaf.
+   * @return the topdecl node that is a parent of leaf.
+   */
+  private ParseTree getTopdeclParent(TerminalNode leaf) {
+    ParseTree parent = leaf.getParent();
+    while (!(parent instanceof HaskellParser.TopdeclContext)) {
+      parent = parent.getParent();
+    }
+
+    return parent;
+  }
+
+  /**
+   * Checks if the function pattern is a wildcard pattern or not.
+   *
+   * @param leaves the leaves of the function pattern.
+   * @return true if it is a wildcard pattern; false otherwise.
+   */
+  private boolean isWildcardPattern(List<TerminalNode> leaves) {
+    return leaves.size() == 0 || leaves.size() == 1 && leaves.get(0).getText().equals("_");
   }
 
   /**
@@ -523,7 +599,7 @@ public class HalsteadVisitor extends HaskellParserBaseVisitor<Void> {
     }
   }
 
-  private void updateNumBranches(String key) {
+  private void incrementNumBranches(String key) {
     if (key.endsWith(".")) {
       return;
     }
@@ -534,6 +610,19 @@ public class HalsteadVisitor extends HaskellParserBaseVisitor<Void> {
       functionMap.put(key, new CyclomaticComplexityMetric().incrementNumBranches());
     }
   }
+
+  private void decrementNumBranches(String key) {
+    if (key.endsWith(".")) {
+      return;
+    }
+
+    if (functionMap.containsKey(key)) {
+      functionMap.put(key, functionMap.get(key).decrementNumBranches());
+    } else {
+      functionMap.put(key, new CyclomaticComplexityMetric());
+    }
+  }
+
 
   private void updateNumOperators(String key) {
     if (key.endsWith(".")) {

@@ -9,6 +9,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
 
+import static com.bramdekker.main.util.MathUtil.giniCoefficient;
 import static com.bramdekker.main.util.MetricPrinter.getMetricString;
 
 // - lines of code (LOC)
@@ -42,6 +43,7 @@ public class Size {
   private static long parseTreeSize = 0;
   private static long avgModuleSize = 0;
   private static long maxModuleSize = 0;
+  private static double sizeGiniCoefficient = 0.0;
   private static String maxModuleName = "";
 
   /**
@@ -70,6 +72,9 @@ public class Size {
       sizeSection.append(getMetricString("Average module size (NCLOC)", avgModuleSize));
       sizeSection.append(getMetricString("Maximum module size (NCLOC)", maxModuleSize));
       sizeSection.append(getMetricString("Maximum module size file", maxModuleName));
+      sizeSection.append(getMetricString(
+              "Module size inequality (Gini-coefficient on NCLOC)", sizeGiniCoefficient
+      ));
     }
 
     return sizeSection.toString();
@@ -99,6 +104,10 @@ public class Size {
         // Line separator is excluded from nextLine, hence the +1.
         charsInFile += curLine.length() + 1;
 
+        if (inTypeSynonymOrDataType && (isBlank(curLine) || isEndOfDataDeclaration(curLine))) {
+          inTypeSynonymOrDataType = false;
+        }
+
         if (curLine.startsWith("module ")) {
           inModuleExports = true;
         } else if (curLine.startsWith("data ") || curLine.startsWith("type ")) {
@@ -125,10 +134,6 @@ public class Size {
 
         if (inModuleExports && isEndOfModuleExport(curLine)) {
           inModuleExports = false;
-        }
-
-        if (inTypeSynonymOrDataType && isEndOfTypeSynonymOrDataType(curLine)) {
-          inTypeSynonymOrDataType = false;
         }
       }
 
@@ -165,6 +170,10 @@ public class Size {
       maxModuleSize = maxSize.get().ncloc;
       maxModuleName = maxSize.get().name;
     }
+
+    sizeGiniCoefficient = giniCoefficient(
+            dataPerFile.stream().map(data -> (double) data.ncloc).toList()
+    );
   }
 
   /**
@@ -241,11 +250,23 @@ public class Size {
     return line.startsWith("import ") || line.startsWith("{-#");
   }
 
+  /**
+   * Check whether a line is the end of the module export section.
+   *
+   * @param line String representing a line.
+   * @return true if line is the end of the module export section; false otherwise;
+   */
   private static boolean isEndOfModuleExport(String line) {
-    return line.equals("where") || line.endsWith(" where") || line.contains(" where ");
+    return line.equals("where") || line.endsWith(" where");
   }
 
-  private static boolean isEndOfTypeSynonymOrDataType(String line) {
+  /**
+   * Check whether the line is the end of a type synonym or data type.
+   *
+   * @param line String representing a line.
+   * @return true if line is the end of a type synonym or data type.
+   */
+  private static boolean isEndOfDataDeclaration(String line) {
     return !Character.isWhitespace(line.charAt(0));
   }
 

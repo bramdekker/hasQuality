@@ -67,11 +67,12 @@ public class Structural {
     StringBuilder structuralSection = new StringBuilder("Structural metrics:\n");
 
     structuralSection.append(
-        getMetricString("Average cyclomatic complexity", avgCyclomaticComplexity));
+        getMetricString("Average McCabe's cyclomatic complexity", avgCyclomaticComplexity));
     structuralSection.append(
-        getMetricString("Maximum cyclomatic complexity", maxCyclomaticComplexity));
+        getMetricString("Maximum McCabe's cyclomatic complexity", maxCyclomaticComplexity));
     structuralSection.append(
-        getMetricString("Maximum cyclomatic complexity name", maxCyclomaticComplexityName));
+        getMetricString("Maximum McCabe's cyclomatic complexity name", maxCyclomaticComplexityName)
+    );
     structuralSection.append(
         getMetricString("Average number of operators per function", avgNumOperators));
     structuralSection.append(getMetricString("Maximum number of operators", maxNumOperators));
@@ -225,7 +226,7 @@ public class Structural {
     Optional<Map.Entry<String, CyclomaticComplexityMetric>> maxCyclo =
         cycloMap.entrySet().stream()
             .max(Comparator.comparingLong(e -> e.getValue().getNumBranches()));
-    if (maxCyclo.isPresent() && maxCyclo.get().getValue().getNumBranches() != 0) {
+    if (maxCyclo.isPresent()) {
       maxCyclomaticComplexity = maxCyclo.get().getValue().getNumBranches() + 1;
       maxCyclomaticComplexityName = maxCyclo.get().getKey();
     }

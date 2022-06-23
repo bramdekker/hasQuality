@@ -2,14 +2,12 @@ package com.bramdekker.main.resources;
 
 import antlr.HaskellLexer;
 import antlr.HaskellParser;
-import org.antlr.v4.gui.TreeViewer;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.antlr.v4.runtime.tree.xpath.XPath;
 
-import javax.swing.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -23,8 +21,9 @@ public class HaskellParseTree {
   private static HaskellParseTree instance;
   private Map<String, ParseTree> treeDict;
   private Map<String, ParseTree> patternDict;
-  private List<ParseTree> letInList;
-  private List<ParseTree> whereList;
+  private List<ParseTree> letInPatternsList;
+  private List<ParseTree> wherePatternsList;
+  private List<ParseTree> casePatternsList;
 
   /** Private constructor to make it singleton. */
   private HaskellParseTree() {}
@@ -74,8 +73,9 @@ public class HaskellParseTree {
     HaskellParseTree parseTree = new HaskellParseTree();
     parseTree.treeDict = new HashMap<>();
     parseTree.patternDict = new HashMap<>();
-    parseTree.letInList = new ArrayList<>();
-    parseTree.whereList = new ArrayList<>();
+    parseTree.letInPatternsList = new ArrayList<>();
+    parseTree.wherePatternsList = new ArrayList<>();
+    parseTree.casePatternsList = new ArrayList<>();
 
     for (File file : FileList.getInstance().getHaskellFiles()) {
       HaskellLexer lexer =
@@ -90,23 +90,27 @@ public class HaskellParseTree {
         TerminalNode function = (TerminalNode) getLeftMostChild(t);
         String patternName =
             String.format(
-                "%s.%s (line %d)", moduleName, function.getText(), function.getSymbol().getLine());
+                "%s%s (line %d)", moduleName, function.getText(), function.getSymbol().getLine());
         parseTree.patternDict.put(patternName, t);
       }
 
-      parseTree.letInList.addAll(XPath.findAll(tree, "//aexp/decllist/decls/decl", parser));
-      parseTree.whereList.addAll(
-          XPath.findAll(tree, "//wherebinds/binds/decllist/decls/decl", parser));
+      parseTree.letInPatternsList.addAll(
+          XPath.findAll(tree, "//aexp/decllist/decls/decl/decl_no_th/infixexp", parser));
+      parseTree.wherePatternsList.addAll(
+          XPath.findAll(
+              tree, "//wherebinds/binds/decllist/decls/decl/decl_no_th/infixexp", parser));
+      parseTree.casePatternsList.addAll(XPath.findAll(tree, "//alts/alt/pat", parser));
 
-      //            JFrame frame = new JFrame("Antlr parse tree");
-      //            JPanel panel = new JPanel();
-      //            TreeViewer viewer = new TreeViewer(Arrays.asList(parser.getRuleNames()), tree);
-      //            viewer.setScale(1.0); // Scale a little
-      //            panel.add(viewer);
-      //            frame.add(panel);
-      //            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-      //            frame.pack();
-      //            frame.setVisible(true);
+      //                  JFrame frame = new JFrame("Antlr parse tree");
+      //                  JPanel panel = new JPanel();
+      //                  TreeViewer viewer = new TreeViewer(Arrays.asList(parser.getRuleNames()),
+      // tree);
+      //                  viewer.setScale(1.0); // Scale a little
+      //                  panel.add(viewer);
+      //                  frame.add(panel);
+      //                  frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+      //                  frame.pack();
+      //                  frame.setVisible(true);
     }
 
     return parseTree;
@@ -122,7 +126,7 @@ public class HaskellParseTree {
     }
 
     if (moduleContentNode != null) {
-      return getLeftMostChild(moduleContentNode.getChild(1)).getText();
+      return getLeftMostChild(moduleContentNode.getChild(1)).getText() + ".";
     }
 
     return "";
@@ -165,8 +169,8 @@ public class HaskellParseTree {
    *
    * @return a List with all let-in expressions in all modules.
    */
-  public List<ParseTree> getLetInList() {
-    return this.letInList;
+  public List<ParseTree> getLetInPatternsList() {
+    return this.letInPatternsList;
   }
 
   /**
@@ -174,7 +178,16 @@ public class HaskellParseTree {
    *
    * @return a List with all where clauses in all modules.
    */
-  public List<ParseTree> getWhereList() {
-    return this.whereList;
+  public List<ParseTree> getWherePatternsList() {
+    return this.wherePatternsList;
+  }
+
+  /**
+   * Getter for the caseList field.
+   *
+   * @return a List with all case patterns in all modules.
+   */
+  public List<ParseTree> getCasePatternsList() {
+    return this.casePatternsList;
   }
 }

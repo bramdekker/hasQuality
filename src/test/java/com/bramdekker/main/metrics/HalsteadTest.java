@@ -73,7 +73,9 @@ class HalsteadTest {
 
   @Test
   void maxHalsteadVocabularyNameIsCorrect() {
-    assertTrue(halsteadSection.matches("(?s).*Maximum Halstead vocabulary file:.*/Individual.hs.*$"));
+    assertTrue(halsteadSection.matches(
+            "(?s).*Maximum Halstead vocabulary file:.*/Individual.hs.*$")
+    );
   }
 
   @Test
