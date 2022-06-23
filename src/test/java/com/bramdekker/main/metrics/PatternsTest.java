@@ -25,7 +25,7 @@ class PatternsTest {
 
   @Test
   void avgNumberOfVariablesMeasureIsCorrect() {
-    assertTrue(patternsSection.contains("Average number of variables: 1.43"));
+    assertTrue(patternsSection.contains("Average number of variables: 1.00"));
   }
 
   @Test
