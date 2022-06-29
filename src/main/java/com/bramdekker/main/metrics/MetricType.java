@@ -32,6 +32,11 @@ public enum MetricType {
       return Readability.getSection();
     }
   },
+  CALLGRAPH {
+    public String getSection() throws IOException {
+      return Callgraph.getSection();
+    }
+  },
   STRUCTURAL {
     public String getSection() throws IOException {
       return Structural.getSection();

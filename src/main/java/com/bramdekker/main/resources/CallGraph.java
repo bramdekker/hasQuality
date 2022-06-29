@@ -2,7 +2,9 @@ package com.bramdekker.main.resources;
 
 import com.bramdekker.main.util.CallGraphVisitor;
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.jgrapht.graph.*;
+import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.graph.DirectedPseudograph;
+import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.traverse.DepthFirstIterator;
 
 import java.io.IOException;
@@ -17,6 +19,7 @@ import java.util.Map;
 public class CallGraph {
   private static CallGraph instance;
   private DirectedPseudograph<String, DefaultEdge> graph;
+  private SimpleDirectedGraph<String, DefaultEdge> moduleGraph;
 
   /** Private constructor to make it singleton. */
   private CallGraph() {}
@@ -43,9 +46,12 @@ public class CallGraph {
   private static CallGraph generateInstance() throws IOException {
     CallGraph callGraph = new CallGraph();
     callGraph.graph = new DirectedPseudograph<>(DefaultEdge.class);
+    callGraph.moduleGraph = new SimpleDirectedGraph<>(DefaultEdge.class);
 
     List<String> userDefinedFunctions = HaskellParseTree.getInstance().getFunctionNames();
     for (String functionName : userDefinedFunctions) {
+      String moduleName = functionName.split("\\.")[0];
+      callGraph.moduleGraph.addVertex(moduleName);
       callGraph.graph.addVertex(functionName);
     }
 
@@ -55,25 +61,37 @@ public class CallGraph {
       callGraphVisitor.visit(entry.getValue());
     }
 
-    //        // Print out the graph to be sure it's really complete
-    //        Iterator<String> iter = new DepthFirstIterator<>(callGraph.graph);
-    //        while (iter.hasNext()) {
-    //            String vertex = iter.next();
-    //            System.out
-    //                    .println(
-    //                            "Vertex " + vertex + " is connected to: "
-    //                                    + callGraph.graph.edgesOf(vertex).toString());
-    //        }
+    for (DefaultEdge e : callGraph.graph.edgeSet()) {
+      String[] vertexNames = e.toString().replaceAll("[(\\[\\])]", "").split(" : ");
+      String source = vertexNames[0].split("\\.")[0];
+      String target = vertexNames[1].split("\\.")[0];
+      if (!source.equals(target)
+          && callGraph.moduleGraph.containsVertex(source)
+          && callGraph.moduleGraph.containsVertex(target)
+          && !callGraph.moduleGraph.containsEdge(source, target)
+          && !callGraph.moduleGraph.containsEdge(target, source)) {
+        callGraph.moduleGraph.addEdge(source, target);
+      }
+    }
 
     return callGraph;
   }
 
   /**
-   * Getter for the directed callgraph.
+   * Getter for the directed callgraph on functions.
    *
    * @return DirectedPseudoGraph representing the function callgraph.
    */
   public DirectedPseudograph<String, DefaultEdge> getGraph() {
     return graph;
+  }
+
+  /**
+   * Getter for the directed callgraph on modules.
+   *
+   * @return SimpleDirectedGraph representing the module callgraph.
+   */
+  public SimpleDirectedGraph<String, DefaultEdge> getModuleGraph() {
+    return moduleGraph;
   }
 }
