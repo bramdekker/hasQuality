@@ -35,6 +35,11 @@ public class Report {
   public void display() throws IOException {
     System.out.printf("Report for %s\n%n", config.getPathname());
     for (MetricType metric : config.getMetrics()) {
+      // Change for final product.
+      if (metric.equals(MetricType.RECURSION)) {
+        continue;
+      }
+
       System.out.println(metric.getSection());
       System.out.println();
     }
