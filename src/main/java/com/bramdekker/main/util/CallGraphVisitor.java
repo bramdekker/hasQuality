@@ -22,7 +22,6 @@ public class CallGraphVisitor extends HaskellParserBaseVisitor<Void> {
   private final DirectedPseudograph<String, DefaultEdge> callGraph;
   private Map<String, String> importedFunctions;
   private String currentFunction;
-  // TODO: now implemented/use algorithms on it to calculate structural metrics
 
   /**
    * Constructor for the callgraph visitor instance settinf the userDefinedFunctions and callgraph
