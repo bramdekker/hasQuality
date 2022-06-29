@@ -38,6 +38,7 @@ public class Configuration {
         case "-rd" -> this.metrics.add(READABILITY);
         case "-h" -> this.metrics.add(HALSTEAD);
         case "-st" -> this.metrics.add(STRUCTURAL);
+        case "-c" -> this.metrics.add(CALLGRAPH);
         default -> throw new InvalidCommandException("Unknown flag used!");
       }
     }

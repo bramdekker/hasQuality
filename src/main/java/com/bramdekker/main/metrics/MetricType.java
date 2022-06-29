@@ -18,7 +18,7 @@ public enum MetricType {
     }
   },
   RECURSION {
-    public String getSection() {
+    public String getSection() throws IOException {
       return Recursion.getSection();
     }
   },
@@ -30,6 +30,11 @@ public enum MetricType {
   READABILITY {
     public String getSection() throws IOException {
       return Readability.getSection();
+    }
+  },
+  CALLGRAPH {
+    public String getSection() throws IOException {
+      return Callgraph.getSection();
     }
   },
   STRUCTURAL {

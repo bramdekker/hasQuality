@@ -22,7 +22,6 @@ import java.util.Map;
 public class HalsteadVisitor extends HaskellParserBaseVisitor<Void> {
   private static final LeafVisitor leafVisitor = new LeafVisitor();
   private String currentFunction = "";
-  private String previousFunction = "";
   private String module = "";
   private String lastOperator = "";
   private final Map<String, CyclomaticComplexityMetric> functionMap = new HashMap<>();
@@ -135,8 +134,8 @@ public class HalsteadVisitor extends HaskellParserBaseVisitor<Void> {
                 && !isWildcardPattern(leaves)) {
           incrementNumBranches(getFunctionName());
         }
-        if (!this.functions.contains(functionName.getText())) {
-          this.functions.add(functionName.getText());
+        if (!this.functions.contains(getFunctionName())) {
+          this.functions.add(getFunctionName());
         }
       }
 
@@ -257,56 +256,9 @@ public class HalsteadVisitor extends HaskellParserBaseVisitor<Void> {
               && !getLeftMostChild(ctx.getChild(i)).getText().equals("_")) {
         incrementNumBranches(getFunctionName());
       }
-
     }
 
     return super.visitAlts(ctx);
-  }
-
-  /**
-   * Checks whether the wildcard matches all in a function pattern.
-   *
-   * @param leaf the TerminalNode that is the wildcard.
-   * @return true if the wildcard matches all patterns in a function pattern; false otherwise.
-   */
-  private boolean isMatchAllInFunctionPattern(TerminalNode leaf) {
-    ParseTree topdeclParent = getTopdeclParent(leaf);
-
-    if (topdeclParent.getChild(0) instanceof HaskellParser.Decl_no_thContext) {
-      ParseTree fexp = topdeclParent.getChild(0);
-
-      while (!(fexp instanceof HaskellParser.FexpContext)) {
-        if (fexp.getChildCount() != 1) {
-          return false;
-        }
-        fexp = fexp.getChild(0);
-      }
-
-      ParseTree aexp = fexp.getChild(1);
-
-      while (aexp.getChildCount() == 1) {
-        aexp = aexp.getChild(0);
-      }
-
-      return aexp.getText().equals("_");
-    }
-
-    return false;
-  }
-
-  /**
-   * Get the topdecl parent node of the leaf.
-   *
-   * @param leaf the leaf.
-   * @return the topdecl node that is a parent of leaf.
-   */
-  private ParseTree getTopdeclParent(TerminalNode leaf) {
-    ParseTree parent = leaf.getParent();
-    while (!(parent instanceof HaskellParser.TopdeclContext)) {
-      parent = parent.getParent();
-    }
-
-    return parent;
   }
 
   /**
@@ -610,19 +562,6 @@ public class HalsteadVisitor extends HaskellParserBaseVisitor<Void> {
       functionMap.put(key, new CyclomaticComplexityMetric().incrementNumBranches());
     }
   }
-
-  private void decrementNumBranches(String key) {
-    if (key.endsWith(".")) {
-      return;
-    }
-
-    if (functionMap.containsKey(key)) {
-      functionMap.put(key, functionMap.get(key).decrementNumBranches());
-    } else {
-      functionMap.put(key, new CyclomaticComplexityMetric());
-    }
-  }
-
 
   private void updateNumOperators(String key) {
     if (key.endsWith(".")) {

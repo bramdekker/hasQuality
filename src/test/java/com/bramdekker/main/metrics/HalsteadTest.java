@@ -52,7 +52,7 @@ class HalsteadTest {
   }
 
   @Test
-  void maHalsteadLengthNameIsCorrect() {
+  void maxHalsteadLengthNameIsCorrect() {
     assertTrue(halsteadSection.matches("(?s).*Maximum Halstead length file:.*/Individual.hs.*$"));
   }
 

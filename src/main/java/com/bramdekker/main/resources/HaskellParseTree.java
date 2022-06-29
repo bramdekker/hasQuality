@@ -24,6 +24,7 @@ public class HaskellParseTree {
   private List<ParseTree> letInPatternsList;
   private List<ParseTree> wherePatternsList;
   private List<ParseTree> casePatternsList;
+  private List<String> functionNames;
 
   /** Private constructor to make it singleton. */
   private HaskellParseTree() {}
@@ -76,6 +77,7 @@ public class HaskellParseTree {
     parseTree.letInPatternsList = new ArrayList<>();
     parseTree.wherePatternsList = new ArrayList<>();
     parseTree.casePatternsList = new ArrayList<>();
+    parseTree.functionNames = new ArrayList<>();
 
     for (File file : FileList.getInstance().getHaskellFiles()) {
       HaskellLexer lexer =
@@ -92,6 +94,10 @@ public class HaskellParseTree {
             String.format(
                 "%s%s (line %d)", moduleName, function.getText(), function.getSymbol().getLine());
         parseTree.patternDict.put(patternName, t);
+        String functionName = String.format("%s%s", moduleName, function.getText());
+        if (!parseTree.functionNames.contains(functionName)) {
+          parseTree.functionNames.add(functionName);
+        }
       }
 
       parseTree.letInPatternsList.addAll(
@@ -101,16 +107,17 @@ public class HaskellParseTree {
               tree, "//wherebinds/binds/decllist/decls/decl/decl_no_th/infixexp", parser));
       parseTree.casePatternsList.addAll(XPath.findAll(tree, "//alts/alt/pat", parser));
 
-      //                  JFrame frame = new JFrame("Antlr parse tree");
-      //                  JPanel panel = new JPanel();
-      //                  TreeViewer viewer = new TreeViewer(Arrays.asList(parser.getRuleNames()),
-      // tree);
-      //                  viewer.setScale(1.0); // Scale a little
-      //                  panel.add(viewer);
-      //                  frame.add(panel);
-      //                  frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-      //                  frame.pack();
-      //                  frame.setVisible(true);
+      //                              JFrame frame = new JFrame("Antlr parse tree");
+      //                              JPanel panel = new JPanel();
+      //                              TreeViewer viewer = new
+      //                                      TreeViewer(Arrays.asList(parser.getRuleNames()),
+      //             tree);
+      //                              viewer.setScale(1.0); // Scale a little
+      //                              panel.add(viewer);
+      //                              frame.add(panel);
+      //                              frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+      //                              frame.pack();
+      //                              frame.setVisible(true);
     }
 
     return parseTree;
@@ -189,5 +196,14 @@ public class HaskellParseTree {
    */
   public List<ParseTree> getCasePatternsList() {
     return this.casePatternsList;
+  }
+
+  /**
+   * Getter for the functionNames field.
+   *
+   * @return a List with all functionNames in all modules.
+   */
+  public List<String> getFunctionNames() {
+    return this.functionNames;
   }
 }

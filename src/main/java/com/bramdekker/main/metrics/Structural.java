@@ -1,5 +1,6 @@
 package com.bramdekker.main.metrics;
 
+import com.bramdekker.main.resources.CallGraph;
 import com.bramdekker.main.resources.HaskellParseTree;
 import com.bramdekker.main.util.HalsteadVisitor;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -62,6 +63,8 @@ public class Structural {
    */
   public static String getSection() throws IOException {
     collectFileData();
+
+    CallGraph graph = CallGraph.getInstance();
 
     calculateMetrics();
     StringBuilder structuralSection = new StringBuilder("Structural metrics:\n");
