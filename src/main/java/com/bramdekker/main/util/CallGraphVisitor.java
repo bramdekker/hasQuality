@@ -11,6 +11,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * A ParseTree visitor that will add edges to the callgraph on function level.
+ */
 public class CallGraphVisitor extends HaskellParserBaseVisitor<Void> {
   private final List<String> userDefinedFunctions;
   private List<String> internalFunctions;
@@ -19,8 +22,16 @@ public class CallGraphVisitor extends HaskellParserBaseVisitor<Void> {
   private final DirectedPseudograph<String, DefaultEdge> callGraph;
   private Map<String, String> importedFunctions;
   private String currentFunction;
-  // TODO: callgraph seems to be working correctly!!!
   // TODO: now implemented/use algorithms on it to calculate structural metrics
+
+  /**
+   * Constructor for the callgraph visitor instance settinf the userDefinedFunctions and callgraph
+   * accordingly. Also currentFunction and importedFunction are initialized.
+   *
+   * @param userDefinedFunctions List of Strings with functions that the user defined in this
+   *                             project.
+   * @param callGraph The callgraph with all vertices already in place.
+   */
   public CallGraphVisitor(
       List<String> userDefinedFunctions, DirectedPseudograph<String, DefaultEdge> callGraph) {
     this.userDefinedFunctions = userDefinedFunctions;
@@ -60,7 +71,7 @@ public class CallGraphVisitor extends HaskellParserBaseVisitor<Void> {
           if (qualified) {
             curImportedFunctions.replaceAll((k, v) -> v.replace(finalOriginalModule, finalRenamed));
           } else {
-              String finalRenamed1 = renamed;
+            String finalRenamed1 = renamed;
             curImportedFunctions.replaceAll((k, v) -> finalRenamed1 + "." + v);
           }
         } else {
@@ -70,7 +81,6 @@ public class CallGraphVisitor extends HaskellParserBaseVisitor<Void> {
             if (func.startsWith(modulePrefix)) {
               curImportedFunctions.put(func, func);
             }
-
           }
           if (!qualified) {
             curImportedFunctions.replaceAll((k, v) -> v.substring(modulePrefix.length()));
@@ -87,17 +97,19 @@ public class CallGraphVisitor extends HaskellParserBaseVisitor<Void> {
         List<String> funcs =
             leaves.stream()
                 .map(ParseTree::getText)
-                .filter(f -> !(f.equals(",") || f.equals("(") || f.equals(")") || f.equals("hiding")))
+                .filter(
+                    f -> !(f.equals(",") || f.equals("(") || f.equals(")") || f.equals("hiding")))
                 .toList();
 
         if (curChild.getChild(0).getText().equals("hiding")) {
-          for (String name: funcs) {
+          for (String name : funcs) {
             curImportedFunctions.remove(originalModule + "." + name);
           }
         } else {
           Map<String, String> actualImported = new HashMap<>();
-          for (String name: funcs) {
-            actualImported.put(originalModule + "." + name, curImportedFunctions.get(originalModule + "." + name));
+          for (String name : funcs) {
+            actualImported.put(
+                originalModule + "." + name, curImportedFunctions.get(originalModule + "." + name));
           }
           curImportedFunctions = actualImported;
         }
@@ -170,16 +182,22 @@ public class CallGraphVisitor extends HaskellParserBaseVisitor<Void> {
       return null;
     } else if (this.internalFunctions.contains(operatorName)) {
       // Add edge from currentFunction to called function: intra-module function call!
-      if (callGraph.containsVertex(getFunctionName()) && callGraph.containsVertex(module + "." + operatorName))
+      if (callGraph.containsVertex(getFunctionName())
+          && callGraph.containsVertex(module + "." + operatorName)) {
         callGraph.addEdge(getFunctionName(), module + "." + operatorName);
+      }
     } else {
       checkIfImportedFunction(operatorName);
     }
 
-
     return null;
   }
 
+  /**
+   * Checks if the operator is an imported function and adds an edge to the callgraph if it is.
+   *
+   * @param operatorName the name of the operator.
+   */
   private void checkIfImportedFunction(String operatorName) {
     if (importedFunctions.containsValue(operatorName)) {
       String targetNodeName = "";

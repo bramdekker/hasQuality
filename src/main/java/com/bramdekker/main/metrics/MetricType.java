@@ -18,7 +18,7 @@ public enum MetricType {
     }
   },
   RECURSION {
-    public String getSection() {
+    public String getSection() throws IOException {
       return Recursion.getSection();
     }
   },
