@@ -1,6 +1,6 @@
 # The hasQuality tool
 
-The hasQuality tool is an open-source command line application that analyzes and reports on the quality of Haskell projects. It can help Haskell programmers assess the quality of the code that they have written. It can also be used to identify anomalous modules or functions in the project. 
+The hasQuality tool is an open-source command line application that analyzes and reports on variety of metrics on Haskell projects. It can help Haskell programmers assess the quality of the code that they have written. It can also be used to identify anomalous modules or functions in the project. 
 
 
 ## How to use this application
