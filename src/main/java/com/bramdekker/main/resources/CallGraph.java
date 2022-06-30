@@ -4,7 +4,7 @@ import com.bramdekker.main.util.CallGraphVisitor;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.DirectedPseudograph;
-import org.jgrapht.graph.SimpleDirectedGraph;
+import org.jgrapht.graph.SimpleGraph;
 import org.jgrapht.traverse.DepthFirstIterator;
 
 import java.io.IOException;
@@ -19,7 +19,7 @@ import java.util.Map;
 public class CallGraph {
   private static CallGraph instance;
   private DirectedPseudograph<String, DefaultEdge> graph;
-  private SimpleDirectedGraph<String, DefaultEdge> moduleGraph;
+  private SimpleGraph<String, DefaultEdge> moduleGraph;
 
   /** Private constructor to make it singleton. */
   private CallGraph() {}
@@ -46,7 +46,7 @@ public class CallGraph {
   private static CallGraph generateInstance() throws IOException {
     CallGraph callGraph = new CallGraph();
     callGraph.graph = new DirectedPseudograph<>(DefaultEdge.class);
-    callGraph.moduleGraph = new SimpleDirectedGraph<>(DefaultEdge.class);
+    callGraph.moduleGraph = new SimpleGraph<>(DefaultEdge.class);
 
     List<String> userDefinedFunctions = HaskellParseTree.getInstance().getFunctionNames();
     for (String functionName : userDefinedFunctions) {
@@ -67,9 +67,7 @@ public class CallGraph {
       String target = vertexNames[1].split("\\.")[0];
       if (!source.equals(target)
           && callGraph.moduleGraph.containsVertex(source)
-          && callGraph.moduleGraph.containsVertex(target)
-          && !callGraph.moduleGraph.containsEdge(source, target)
-          && !callGraph.moduleGraph.containsEdge(target, source)) {
+          && callGraph.moduleGraph.containsVertex(target)) {
         callGraph.moduleGraph.addEdge(source, target);
       }
     }
@@ -91,7 +89,7 @@ public class CallGraph {
    *
    * @return SimpleDirectedGraph representing the module callgraph.
    */
-  public SimpleDirectedGraph<String, DefaultEdge> getModuleGraph() {
+  public SimpleGraph<String, DefaultEdge> getModuleGraph() {
     return moduleGraph;
   }
 }

@@ -6,7 +6,7 @@ import org.jgrapht.alg.connectivity.KosarajuStrongConnectivityInspector;
 import org.jgrapht.alg.interfaces.StrongConnectivityAlgorithm;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.DirectedPseudograph;
-import org.jgrapht.graph.SimpleDirectedGraph;
+import org.jgrapht.graph.SimpleGraph;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -90,7 +90,7 @@ public class Callgraph {
    * @throws IOException when a file in the FileList resource cannot be found.
    */
   private static void calculateMetrics() throws IOException {
-    SimpleDirectedGraph<String, DefaultEdge> moduleGraph = CallGraph.getInstance().getModuleGraph();
+    SimpleGraph<String, DefaultEdge> moduleGraph = CallGraph.getInstance().getModuleGraph();
     internalReuse = moduleGraph.edgeSet().size() - moduleGraph.vertexSet().size() + 1;
 
     for (CallgraphMetric m : dataPerFunction) {
