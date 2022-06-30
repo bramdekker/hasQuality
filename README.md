@@ -16,15 +16,15 @@ Multiple flags can be used to compute and report on multiple different metric ca
 
 If no flags are used, all metrics are computed and shown in the report.
 
-Flags:
-- -sz &emsp;&emsp; Compute and report on size metrics.
-- -rc &emsp;&emsp; Compute and report on recursion metrics.
-- -p  &emsp;&emsp; Compute and report on pattern metrics.
-- -rd &emsp;&emsp; Compute and report on readability metrics.
-- -h &emsp;&emsp; Compute and report on Halstead metrics.
-- -st &emsp;&emsp; Compute and report on structural metrics.
-- -c &emsp;&emsp; Compute and report on callgraph metrics. 
-- --help &emsp;&emsp; Show this help message
+Flags:<br/>
+-sz &emsp;&emsp;&emsp;&emsp; Compute and report on size metrics.<br/>
+-rc &emsp;&emsp;&emsp;&emsp; Compute and report on recursion metrics.<br/>
+-p  &emsp;&emsp;&emsp;&emsp; Compute and report on pattern metrics.<br/>
+-rd &emsp;&emsp;&emsp;&emsp; Compute and report on readability metrics.<br/>
+-h &emsp;&emsp;&emsp;&emsp; Compute and report on Halstead metrics.<br/>
+-st &emsp;&emsp;&emsp;&emsp; Compute and report on structural metrics.<br/>
+-c &emsp;&emsp;&emsp;&emsp; Compute and report on callgraph metrics.<br/>
+--help &emsp;&emsp;&emsp; Show this help message
 
 ### Metrics
 
@@ -73,9 +73,9 @@ If there are multiple modules/files in the project, the following metrics are al
 #### Readability metrics
 
 - **Comment density**: CLOC / LOC
-- **Gunning's fog index on comments**: index of how difficult it is to read/understand a piece of text (see <https://en.wikipedia.org/wiki/Gunning_fog_index>)
+- **[Gunning's fog index](https://en.wikipedia.org/wiki/Gunning_fog_index) on comments**: index of how difficult it is to read/understand a piece of text
 
-#### Halstead metrics ([see](https://en.wikipedia.org/wiki/Halstead_complexity_measures))
+#### [Halstead metrics](https://en.wikipedia.org/wiki/Halstead_complexity_measures)
 
 - **Halstead length**: total number of operators + total number of operands
 - **Halstead vocabulary**: number of unique operators + number of unique operands
