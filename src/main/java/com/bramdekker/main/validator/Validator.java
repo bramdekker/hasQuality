@@ -67,7 +67,7 @@ public class Validator {
    */
   private void printHelp() {
     String helpMessage = """
-                USAGE: ./gradle run [flags] <path-to-haskell-project-dir>
+                USAGE: ./gradlew run --args="[flags] <path-to-haskell-project-dir>"
                 
                 Flags:
                     -sz             Compute and report on size metrics.
@@ -76,6 +76,7 @@ public class Validator {
                     -rd             Compute and report on readability metrics.
                     -h              Compute and report on Halstead metrics.
                     -st             Compute and report on structural metrics.
+                    -c              Compute and report on callgraph metrics.
                     --help          Show this help message.
                 """;
     System.out.println(helpMessage.trim());

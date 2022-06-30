@@ -106,18 +106,6 @@ public class HaskellParseTree {
           XPath.findAll(
               tree, "//wherebinds/binds/decllist/decls/decl/decl_no_th/infixexp", parser));
       parseTree.casePatternsList.addAll(XPath.findAll(tree, "//alts/alt/pat", parser));
-
-      //                              JFrame frame = new JFrame("Antlr parse tree");
-      //                              JPanel panel = new JPanel();
-      //                              TreeViewer viewer = new
-      //                                      TreeViewer(Arrays.asList(parser.getRuleNames()),
-      //             tree);
-      //                              viewer.setScale(1.0); // Scale a little
-      //                              panel.add(viewer);
-      //                              frame.add(panel);
-      //                              frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-      //                              frame.pack();
-      //                              frame.setVisible(true);
     }
 
     return parseTree;

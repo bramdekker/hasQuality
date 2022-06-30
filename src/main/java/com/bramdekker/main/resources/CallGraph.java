@@ -5,10 +5,8 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.DirectedPseudograph;
 import org.jgrapht.graph.SimpleGraph;
-import org.jgrapht.traverse.DepthFirstIterator;
 
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 

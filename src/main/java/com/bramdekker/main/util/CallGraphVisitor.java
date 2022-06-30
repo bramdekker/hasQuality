@@ -7,6 +7,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.DirectedPseudograph;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +38,7 @@ public class CallGraphVisitor extends HaskellParserBaseVisitor<Void> {
     this.callGraph = callGraph;
     this.currentFunction = "";
     this.importedFunctions = new HashMap<>();
+    this.internalFunctions = new ArrayList<>();
   }
 
   @Override
